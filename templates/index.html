@@ -1,0 +1,2008 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Bazuka Bets</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+:root {
+  --bg:      #0c1b16;
+  --card:    #112019;
+  --card2:   #172b20;
+  --border:  #1d3828;
+  --green:   #00e676;
+  --green2:  #00c853;
+  --red:     #ff4444;
+  --text:    #ddeedd;
+  --muted:   #6b9478;
+  --row-hover: #162922;
+}
+body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, -apple-system, sans-serif; margin: 0; min-height: 100vh; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #1d3828; border-radius: 3px; }
+
+/* ── Nav ── */
+#topnav {
+  background: #0c1b16;
+  border-bottom: 1px solid var(--border);
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+.logo-box { width:32px; height:32px; border-radius:8px; display:block; object-fit:cover; flex-shrink:0; box-shadow:0 0 18px rgba(0, 230, 118, .22); }
+.nav-btn {
+  padding: 6px 15px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.nav-btn.active  { background: var(--green2); color: #000; }
+.nav-btn.passive { background: var(--card2);  color: var(--text); }
+.nav-btn.passive:hover { background: #1d3828; }
+.nav-btn.danger  { background: #c62828; color: #fff; }
+.nav-btn.admin-style { background: var(--green2); color: #000; }
+
+/* ── Cards ── */
+.card  { background: var(--card);  border: 1px solid var(--border); border-radius: 10px; }
+.card2 { background: var(--card2); border: 1px solid var(--border); border-radius: 8px; }
+.stat-card { padding: 18px 20px; }
+.stat-lbl  { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; display:flex; align-items:center; justify-content:space-between; }
+.stat-val  { font-size: 30px; font-weight: 800; line-height: 1.15; margin-top: 8px; }
+.c-green   { color: var(--green); }
+.c-red     { color: var(--red); }
+.c-white   { color: #fff; }
+.c-muted   { color: var(--muted); }
+
+/* ── Tables ── */
+.tbl-wrap { overflow-x: auto; }
+table { width:100%; border-collapse:collapse; }
+th { font-size: 11px; color: var(--muted); font-weight: 600; padding: 10px 14px; text-align:left; border-bottom: 1px solid var(--border); white-space:nowrap; }
+td { font-size: 13px; padding: 11px 14px; border-bottom: 1px solid #192e23; white-space:nowrap; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background: var(--row-hover); }
+th.r, td.r { text-align:right; }
+
+/* ── Badges ── */
+.badge { display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+.badge-over  { background:#132d1a; color:#4caf50; border:1px solid #1e4228; }
+.badge-under { background:#131f2d; color:#64b5f6; border:1px solid #1e2e42; }
+
+/* ── Result colors ── */
+.rg  { color: var(--green); }
+.rr  { color: var(--red);   }
+
+/* ── Rankings ── */
+.rank-item { display:flex; align-items:center; padding:13px 16px; border-bottom:1px solid var(--border); gap:12px; }
+.rank-item:last-child { border-bottom:none; }
+.rank-num  { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0; }
+.rn-1 { background:#c9a227; color:#000; }
+.rn-2 { background:#7a7a7a; color:#fff; }
+.rn-3 { background:#7a4e30; color:#fff; }
+.rn-x { background:var(--card2); color:var(--muted); }
+
+/* ── Filter buttons ── */
+.fbtn { padding:3px 11px; border-radius:14px; font-size:12px; font-weight:600; cursor:pointer; border:none; transition:all .15s; }
+.fbtn.on  { background:var(--green2); color:#000; }
+.fbtn.off { background:#1a3025; color:var(--muted); }
+.fbtn.off:hover { background:#1d3828; color:var(--text); }
+
+/* ── Inputs ── */
+.inp { background:var(--card2); border:1px solid var(--border); color:var(--text); padding:9px 14px; border-radius:6px; width:100%; outline:none; font-size:13px; }
+.inp:focus { border-color:var(--green2); }
+.inp option { background:#172b20; }
+select.inp { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%236b9478' d='M5 7L0 2h10z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 11px center; padding-right:28px; }
+
+/* ── Buttons ── */
+.btn { border:none; padding:9px 20px; border-radius:6px; cursor:pointer; font-weight:600; font-size:13px; display:inline-flex; align-items:center; gap:6px; transition:opacity .15s; }
+.btn:hover { opacity:.88; }
+.btn-g   { background:var(--green2); color:#000; }
+.btn-r   { background:#c62828; color:#fff; }
+.btn-y   { background:#e6a817; color:#000; }
+.btn-ghost { background:var(--card2); color:var(--text); }
+
+/* ── Pages ── */
+.page { display:none; }
+.page.on { display:block; }
+
+/* ── Section headers ── */
+.sec-hdr { font-size:14px; font-weight:700; margin-bottom:16px; color:var(--text); }
+
+/* ── Modal ── */
+.modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:500; align-items:center; justify-content:center; }
+.modal.on { display:flex; }
+
+/* ── Toast ── */
+#toast { position:fixed; bottom:22px; right:22px; padding:11px 18px; border-radius:8px; font-size:13px; z-index:9999; pointer-events:none; opacity:0; transform:translateY(8px); transition:all .25s; background:var(--card); border:1px solid var(--border); }
+#toast.show { opacity:1; transform:translateY(0); }
+
+/* ── Pagination ── */
+.page-btn { padding:6px 14px; border-radius:6px; border:none; background:var(--card2); color:var(--text); cursor:pointer; font-size:12px; }
+.page-btn:disabled { opacity:.35; cursor:default; }
+.page-btn:not(:disabled):hover { background:var(--border); }
+
+/* ── Empty state ── */
+.empty { text-align:center; padding:40px; color:var(--muted); font-size:13px; }
+
+/* ── Loading ── */
+.loading { text-align:center; padding:30px; color:var(--muted); font-size:13px; }
+.mini-card-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; }
+.mini-card { padding:14px; }
+.status-chip { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.03em; }
+.status-active { background:rgba(0,230,118,.12); color:var(--green); border:1px solid rgba(0,230,118,.25); }
+.status-paused { background:rgba(255,68,68,.12); color:#ff8a80; border:1px solid rgba(255,68,68,.2); }
+.status-standby { background:rgba(255,215,64,.12); color:#ffd740; border:1px solid rgba(255,215,64,.22); }
+.status-pending { background:rgba(107,148,120,.12); color:var(--muted); border:1px solid rgba(107,148,120,.2); }
+.link-btn { color:var(--green); font-size:12px; text-decoration:none; font-weight:700; }
+.link-btn:hover { text-decoration:underline; }
+
+/* ════════════════════════════════════════════════════════
+   RESPONSIVIDADE MOBILE — aplicada em telas ≤ 640px
+   ════════════════════════════════════════════════════════ */
+
+/* ── Nav mobile ── */
+@media (max-width: 640px) {
+  #topnav {
+    height: auto;
+    flex-wrap: wrap;
+    padding: 10px 14px;
+    gap: 8px;
+  }
+  #navbtns {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  #navbtns .nav-btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 11px;
+    padding: 7px 8px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ── Main padding ── */
+  main { padding: 14px 10px; }
+
+  /* ── Stat cards: 2 colunas em mobile ── */
+  [style*="grid-template-columns:repeat(4,1fr)"] {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+  [style*="grid-template-columns:1fr 1fr 1fr"] {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+  [style*="grid-template-columns:1fr 1fr;"] {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* ── Stat card: tamanho menor ── */
+  .stat-card { padding: 12px 14px; }
+  .stat-val { font-size: 22px !important; }
+  .stat-lbl { font-size: 9.5px !important; }
+
+  /* ── Gráficos: empilhar em coluna ── */
+  [style*="grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px"] {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  /* ── Rankings: empilhar ── */
+  [style*="grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px"],
+  [style*="grid-template-columns:1fr 1fr;gap:14px;"] {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  /* ── Filtros de ranking: deixar compactos ── */
+  [id^="fb-"] { flex-wrap: wrap; gap: 3px !important; }
+  .fbtn { padding: 3px 8px !important; font-size: 11px !important; }
+
+  /* ── Tabelas: scroll horizontal já funciona via .tbl-wrap ── */
+  th, td { padding: 8px 10px !important; font-size: 12px !important; }
+
+  /* ── Cards genéricos ── */
+  .card { border-radius: 8px !important; }
+  [style*="padding:20px"] { padding: 14px !important; }
+  [style*="padding:22px"] { padding: 14px !important; }
+  [style*="padding:26px"] { padding: 16px !important; }
+
+  /* ── Títulos ── */
+  [style*="font-size:18px;font-weight:800"] { font-size: 15px !important; }
+
+  /* ── Filtros admin / dados brutos ── */
+  #page-dados > div:first-child { flex-direction: column !important; }
+  #page-dados > div:first-child .inp { width: 100% !important; }
+
+  /* ── Banca analytics: 1 coluna mobile ── */
+  #banca-analytics {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── Banca form: 1 coluna ── */
+  #banca-form-card [style*="grid-template-columns:1fr 1fr 1fr"],
+  #banca-form-card [style*="grid-template-columns:1fr 1fr 1fr;gap:14px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── Período mensal ── */
+  #period-filter-box > div {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── Filtro de mês ── */
+  [style*="flex-wrap:wrap;margin-bottom:12px"] { flex-direction: column !important; align-items: flex-start !important; }
+  #mes-select { width: 100% !important; min-width: unset !important; }
+
+  /* ── Clear period ── */
+  [style*="grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── Modais: garantir que caibam na tela ── */
+  .modal .card { width: 94vw !important; max-width: 94vw !important; padding: 18px !important; }
+  #modal-edit .card [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+  #modal-banca-edit .card [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+  #modal-banca-edit .card [style*="grid-template-columns:1fr 1fr 1fr"] { grid-template-columns: 1fr 1fr !important; }
+  #modal-user-edit .card [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+
+  /* ── Botões de ação ── */
+  [style*="display:flex;gap:10px;flex-wrap:wrap"] { flex-wrap: wrap !important; }
+  .btn { font-size: 12px !important; padding: 8px 14px !important; }
+
+  /* ── Toast ── */
+  #toast { right: 10px; left: 10px; bottom: 14px; font-size: 12px; }
+
+  /* ── Admin pending users ── */
+  .mini-card-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ── Tablet: 641px – 860px ── */
+@media (min-width: 641px) and (max-width: 860px) {
+  #topnav { flex-wrap: wrap; height: auto; padding: 10px 16px; gap: 8px; }
+  #navbtns { width: 100%; flex-wrap: wrap; gap: 5px; }
+  #navbtns .nav-btn { flex: 1 1 auto; font-size: 12px; padding: 7px 10px; }
+
+  main { padding: 16px 14px; }
+
+  [style*="grid-template-columns:repeat(4,1fr)"] {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+  [style*="grid-template-columns:1fr 1fr 1fr"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  [style*="grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════ NAV ════════ -->
+<nav id="topnav">
+  <div style="display:flex;align-items:center;gap:11px;">
+    <div class="logo-box">🎯</div>
+    <div>
+      <div style="font-weight:800;font-size:15px;line-height:1.1;">Bazuka Bets</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1;">VIP</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px;" id="navbtns">
+    <a class="nav-btn passive link-btn" href="/apresentacao" target="_blank" rel="noopener">Bazuka VIP</a>
+    <button class="nav-btn active" id="nb-resumo"  onclick="goPage('resumo')">📊 Resumo Geral</button>
+    <button class="nav-btn passive" id="nb-mensal" onclick="goPage('mensal')">📅 Mensal</button>
+    <button class="nav-btn passive" id="nb-banca" onclick="goPage('banca')" style="display:none">💰 Minha Banca</button>
+    <button class="nav-btn passive" id="nb-dados"  onclick="goPage('dados')"  style="display:none">📋 Dados Brutos</button>
+    <button class="nav-btn admin-style" id="nb-admin" onclick="goPage('admin')" style="display:none">⚙ Admin</button>
+    <button class="nav-btn danger"  id="nb-logout" onclick="doLogout()"        style="display:none">↪ Sair</button>
+    <button class="nav-btn passive" id="nb-login"  onclick="openModal('modal-login')">🔑 Login</button>
+  </div>
+</nav>
+
+<!-- ════════ MAIN ════════ -->
+<main style="max-width:920px;margin:0 auto;padding:22px 16px;">
+
+<!-- ───────── RESUMO GERAL ───────── -->
+<div class="page on" id="page-resumo">
+
+  <!-- stat cards row 1 -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:11px;">
+    <div class="card stat-card">
+      <div class="stat-lbl">ENTRADAS <span>📊</span></div>
+      <div class="stat-val c-white" id="r-entradas">—</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-lbl">GREENS <span>📈</span></div>
+      <div class="stat-val c-green" id="r-greens">—</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-lbl">REDS <span>📉</span></div>
+      <div class="stat-val c-red" id="r-reds">—</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-lbl">LUCRO <span>💰</span></div>
+      <div class="stat-val c-green" id="r-lucro">—</div>
+    </div>
+  </div>
+
+  <!-- stat cards row 2 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:22px;">
+    <div class="card stat-card">
+      <div class="stat-lbl">ROI <span>📈</span></div>
+      <div class="stat-val c-green" id="r-roi">—</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:5px;">Retorno sobre investimento</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-lbl">WIN RATE <span>🎯</span></div>
+      <div class="stat-val c-white" id="r-winrate">—</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:5px;" id="r-winrate-sub"></div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-lbl">ODD MÉDIA <span>🎲</span></div>
+      <div class="stat-val c-white" id="r-odd">—</div>
+    </div>
+  </div>
+
+  <!-- charts -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
+    <div class="card" style="padding:20px;">
+      <div class="sec-hdr">Resultado Mensal (Unidades)</div>
+      <canvas id="chart-mensal" height="160"></canvas>
+    </div>
+    <div class="card" style="padding:20px;">
+      <div class="sec-hdr">Resultado Anual (Unidades)</div>
+      <canvas id="chart-anual" height="160"></canvas>
+    </div>
+  </div>
+
+  <!-- monthly table -->
+  <div class="card" style="margin-bottom:14px;padding:20px;">
+    <div class="sec-hdr">Resultados Mensais</div>
+    <div class="tbl-wrap">
+      <table><thead><tr>
+        <th>Mês</th><th class="r">Entradas</th><th class="r">Retorno</th>
+        <th class="r">Resultado</th><th class="r">Odd Média</th><th class="r">ROI %</th>
+      </tr></thead><tbody id="tb-monthly"></tbody></table>
+    </div>
+  </div>
+
+  <!-- faixas -->
+  <div class="card" style="margin-bottom:14px;padding:20px;">
+    <div class="sec-hdr">Resultados por Faixa Horária</div>
+    <div class="tbl-wrap">
+      <table><thead><tr>
+        <th>Faixa</th><th class="r">Entradas</th><th class="r">Resultado</th><th class="r">ROI %</th>
+      </tr></thead><tbody id="tb-faixas"></tbody></table>
+    </div>
+  </div>
+
+  <!-- ligas -->
+  <div class="card" style="margin-bottom:14px;padding:20px;">
+    <div class="sec-hdr">Resultados por Liga</div>
+    <div class="tbl-wrap">
+      <table><thead><tr>
+        <th>Liga</th><th class="r">Entradas</th><th class="r">Resultado</th><th class="r">ROI %</th>
+      </tr></thead><tbody id="tb-ligas"></tbody></table>
+    </div>
+  </div>
+
+  <!-- liga & mercado -->
+  <div class="card" style="margin-bottom:22px;padding:20px;">
+    <div class="sec-hdr">Resultados por Liga &amp; Mercado</div>
+    <div class="tbl-wrap">
+      <table><thead><tr>
+        <th>Liga &amp; Mercado</th><th class="r">Entradas</th><th class="r">Resultado</th><th class="r">ROI %</th>
+      </tr></thead><tbody id="tb-ligamercado"></tbody></table>
+    </div>
+  </div>
+
+  <!-- rankings section -->
+  <div>
+    <div style="font-size:18px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+      🏆 Rankings Gerais
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <!-- top jogadores -->
+      <div class="card">
+        <div style="padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);">
+          <span style="font-weight:700;font-size:13px;">🏅 Top 5 Melhores Jogadores</span>
+          <div id="fb-tj" style="display:flex;gap:4px;">
+            <button class="fbtn on"  onclick="rfilt(this,'tj','Todos')">Todos</button>
+            <button class="fbtn off" onclick="rfilt(this,'tj','Over')">Over</button>
+            <button class="fbtn off" onclick="rfilt(this,'tj','Under')">Under</button>
+          </div>
+        </div>
+        <div id="top-jogadores"></div>
+      </div>
+      <!-- bot jogadores -->
+      <div class="card">
+        <div style="padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);">
+          <span style="font-weight:700;font-size:13px;">📉 Top 5 Piores Jogadores</span>
+          <div id="fb-bj" style="display:flex;gap:4px;">
+            <button class="fbtn on"  onclick="rfilt(this,'bj','Todos')">Todos</button>
+            <button class="fbtn off" onclick="rfilt(this,'bj','Over')">Over</button>
+            <button class="fbtn off" onclick="rfilt(this,'bj','Under')">Under</button>
+          </div>
+        </div>
+        <div id="bot-jogadores"></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <!-- top confrontos -->
+      <div class="card">
+        <div style="padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);">
+          <span style="font-weight:700;font-size:13px;">⚔️ Top 5 Melhores Confrontos</span>
+          <div id="fb-tc" style="display:flex;gap:4px;">
+            <button class="fbtn on"  onclick="rfilt(this,'tc','Todos')">Todos</button>
+            <button class="fbtn off" onclick="rfilt(this,'tc','Over')">Over</button>
+            <button class="fbtn off" onclick="rfilt(this,'tc','Under')">Under</button>
+          </div>
+        </div>
+        <div id="top-confrontos"></div>
+      </div>
+      <!-- bot confrontos -->
+      <div class="card">
+        <div style="padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);">
+          <span style="font-weight:700;font-size:13px;">💀 Top 5 Piores Confrontos</span>
+          <div id="fb-bc" style="display:flex;gap:4px;">
+            <button class="fbtn on"  onclick="rfilt(this,'bc','Todos')">Todos</button>
+            <button class="fbtn off" onclick="rfilt(this,'bc','Over')">Over</button>
+            <button class="fbtn off" onclick="rfilt(this,'bc','Under')">Under</button>
+          </div>
+        </div>
+        <div id="bot-confrontos"></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /page-resumo -->
+
+
+<!-- ───────── MENSAL ───────── -->
+<div class="page" id="page-mensal">
+  <div class="card" style="padding:14px 18px;margin-bottom:20px;">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px;">
+      <span style="font-size:14px;">📆 Selecione o Período:</span>
+      <select class="inp" id="mes-select" style="width:auto;min-width:180px;" onchange="togglePeriodMode(); loadMensal()">
+        <option value="">— selecione —</option>
+      </select>
+    </div>
+    <div id="period-filter-box" style="display:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:14px;align-items:end;">
+        <div>
+          <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:5px;">Data Inicial</label>
+          <input type="date" class="inp" id="period-start">
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:5px;">Data Final</label>
+          <input type="date" class="inp" id="period-end">
+        </div>
+        <button class="btn btn-g" onclick="loadMensal()">Aplicar Filtro</button>
+      </div>
+      <div id="period-label" style="font-size:12px;color:var(--muted);margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <!-- stats -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:11px;">
+    <div class="card stat-card"><div class="stat-lbl">ENTRADAS <span>📊</span></div><div class="stat-val c-white" id="m-entradas">—</div></div>
+    <div class="card stat-card"><div class="stat-lbl">GREENS <span>📈</span></div><div class="stat-val c-green" id="m-greens">—</div></div>
+    <div class="card stat-card"><div class="stat-lbl">REDS <span>📉</span></div><div class="stat-val c-red" id="m-reds">—</div></div>
+    <div class="card stat-card"><div class="stat-lbl">LUCRO <span>💰</span></div><div class="stat-val c-green" id="m-lucro">—</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:22px;">
+    <div class="card stat-card"><div class="stat-lbl">ROI <span>📈</span></div><div class="stat-val c-green" id="m-roi">—</div></div>
+    <div class="card stat-card"><div class="stat-lbl">WIN RATE <span>🎯</span></div><div class="stat-val c-white" id="m-winrate">—</div></div>
+  </div>
+
+  <!-- diario -->
+  <div class="card" style="margin-bottom:14px;padding:20px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <div class="sec-hdr" style="margin-bottom:0;">Resultado Diário</div>
+      <span style="font-size:12px;color:var(--muted);" id="diario-page-info"></span>
+    </div>
+    <div class="tbl-wrap">
+      <table><thead><tr>
+        <th>Data</th><th class="r">Entradas</th><th class="r">Lucro</th><th class="r">ROI %</th>
+      </tr></thead><tbody id="tb-diario"></tbody></table>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:flex-end;margin-top:12px;gap:6px;" id="diario-pagination">
+      <button class="page-btn" id="diario-prev" onclick="diarioPage--;renderDiarioPage()">← Anterior</button>
+      <button class="page-btn" id="diario-next" onclick="diarioPage++;renderDiarioPage()">Próximo →</button>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px;padding:20px;">
+    <div class="sec-hdr">Resultados por Faixa Horária</div>
+    <div class="tbl-wrap">
+      <table><thead><tr>
+        <th>Faixa</th><th class="r">Entradas</th><th class="r">Resultado</th><th class="r">ROI %</th>
+      </tr></thead><tbody id="tb-faixas-m"></tbody></table>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px;padding:20px;">
+    <div class="sec-hdr">Resultados por Liga</div>
+    <div class="tbl-wrap">
+      <table><thead><tr>
+        <th>Liga</th><th class="r">Entradas</th><th class="r">Resultado</th><th class="r">ROI %</th>
+      </tr></thead><tbody id="tb-ligas-m"></tbody></table>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:22px;padding:20px;">
+    <div class="sec-hdr">Resultados por Liga &amp; Mercado</div>
+    <div class="tbl-wrap">
+      <table><thead><tr>
+        <th>Liga &amp; Mercado</th><th class="r">Entradas</th><th class="r">Resultado</th><th class="r">ROI %</th>
+      </tr></thead><tbody id="tb-ligamercado-m"></tbody></table>
+    </div>
+  </div>
+
+  <!-- rankings mensal -->
+  <div>
+    <div style="font-size:18px;font-weight:800;margin-bottom:16px;">🏆 Rankings — <span id="rank-mes-titulo" style="color:var(--green)"></span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div class="card">
+        <div style="padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);">
+          <span style="font-weight:700;font-size:13px;">🏅 Top 5 Melhores Jogadores</span>
+          <div style="display:flex;gap:4px;">
+            <button class="fbtn on"  onclick="rfiltM(this,'tj','Todos')">Todos</button>
+            <button class="fbtn off" onclick="rfiltM(this,'tj','Over')">Over</button>
+            <button class="fbtn off" onclick="rfiltM(this,'tj','Under')">Under</button>
+          </div>
+        </div>
+        <div id="top-jogadores-m"></div>
+      </div>
+      <div class="card">
+        <div style="padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);">
+          <span style="font-weight:700;font-size:13px;">📉 Top 5 Piores Jogadores</span>
+          <div style="display:flex;gap:4px;">
+            <button class="fbtn on"  onclick="rfiltM(this,'bj','Todos')">Todos</button>
+            <button class="fbtn off" onclick="rfiltM(this,'bj','Over')">Over</button>
+            <button class="fbtn off" onclick="rfiltM(this,'bj','Under')">Under</button>
+          </div>
+        </div>
+        <div id="bot-jogadores-m"></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="card">
+        <div style="padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);">
+          <span style="font-weight:700;font-size:13px;">⚔️ Top 5 Melhores Confrontos</span>
+          <div style="display:flex;gap:4px;">
+            <button class="fbtn on"  onclick="rfiltM(this,'tc','Todos')">Todos</button>
+            <button class="fbtn off" onclick="rfiltM(this,'tc','Over')">Over</button>
+            <button class="fbtn off" onclick="rfiltM(this,'tc','Under')">Under</button>
+          </div>
+        </div>
+        <div id="top-confrontos-m"></div>
+      </div>
+      <div class="card">
+        <div style="padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);">
+          <span style="font-weight:700;font-size:13px;">💀 Top 5 Piores Confrontos</span>
+          <div style="display:flex;gap:4px;">
+            <button class="fbtn on"  onclick="rfiltM(this,'bc','Todos')">Todos</button>
+            <button class="fbtn off" onclick="rfiltM(this,'bc','Over')">Over</button>
+            <button class="fbtn off" onclick="rfiltM(this,'bc','Under')">Under</button>
+          </div>
+        </div>
+        <div id="bot-confrontos-m"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- logs de apostas -->
+  <div class="card" style="margin-top:22px;padding:20px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <div class="sec-hdr" id="logs-title" style="margin-bottom:0;">📋 Log de Apostas</div>
+      <span style="font-size:12px;color:var(--muted);" id="logs-info"></span>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Liga</th><th>Data</th><th>Hora</th><th>Confronto</th>
+          <th>Mercado</th><th class="r">Odd</th><th>Resultado</th>
+          <th class="r">Lucro</th><th>Faixa Horária</th>
+        </tr></thead>
+        <tbody id="tb-logs"></tbody>
+      </table>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:8px;">
+      <span style="font-size:12px;color:var(--muted);" id="logs-page-info"></span>
+      <div style="display:flex;gap:6px;">
+        <button class="page-btn" id="logs-prev" onclick="logsPage--;renderLogsPage()">← Anterior</button>
+        <button class="page-btn" id="logs-next" onclick="logsPage++;renderLogsPage()">Próximo →</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /page-mensal -->
+
+
+<!-- ───────── MINHA BANCA ───────── -->
+<div class="page" id="page-banca">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap;">
+    <div>
+      <h2 style="font-size:22px;font-weight:800;margin:0 0 4px;">Gestão de Banca</h2>
+      <p style="color:var(--muted);margin:0;font-size:13px;">Acompanhe seus resultados em R$</p>
+    </div>
+    <button class="btn btn-g" onclick="toggleBancaForm()">+ Nova Aposta</button>
+  </div>
+
+  <div class="card" id="banca-form-card" style="padding:22px;margin-bottom:16px;display:none;">
+    <div style="font-weight:700;font-size:18px;margin-bottom:18px;">Registrar Nova Aposta</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:5px;">Data</label><input type="date" class="inp" id="b-data"></div>
+      <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:5px;">Hora</label><input type="time" class="inp" id="b-hora"></div>
+      <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:5px;">Confronto</label><input class="inp" id="b-confronto" placeholder="Ex: Jogador1 vs Jogador2" list="dl-confrontos" autocomplete="off"></div>
+      <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:5px;">Liga</label><input class="inp" id="b-liga" placeholder="Ex: Esoccer Battle" list="dl-ligas" autocomplete="off"></div>
+      <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:5px;">Mercado</label><select class="inp" id="b-mercado"><option>Over Partida</option><option>Under Partida</option><option>Over HT</option><option>Under HT</option><option>HC Jogador A</option><option>HC Jogador B</option><option>Over Jogador A</option><option>Under Jogador A</option><option>Over Jogador B</option><option>Under Jogador B</option><option>HC Europeu HT</option><option>HC Europeu Partida</option></select></div>
+      <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:5px;">Odd</label><input class="inp" id="b-odd" type="number" step="0.01" placeholder="1.85"></div>
+      <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:5px;">Resultado</label><select class="inp" id="b-resultado"><option>Green</option><option>Meio Green</option><option>Red</option><option>Meio Red</option><option>Reembolso</option><option>Pendente</option></select></div>
+      <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:5px;">Valor Apostado (R$)</label><input class="inp" id="b-valor" type="number" step="0.01" placeholder="100.00"></div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-g" onclick="saveBanca()">Salvar Aposta</button>
+      <button class="btn btn-ghost" onclick="toggleBancaForm(false)">Cancelar</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:11px;">
+    <div class="card stat-card"><div class="stat-lbl">ENTRADAS</div><div class="stat-val c-white" id="b-entradas">—</div></div>
+    <div class="card stat-card"><div class="stat-lbl">TOTAL APOSTADO</div><div class="stat-val c-white" id="b-total">—</div></div>
+    <div class="card stat-card"><div class="stat-lbl">RETORNO TOTAL</div><div class="stat-val c-white" id="b-retorno">—</div></div>
+    <div class="card stat-card"><div class="stat-lbl">LUCRO (R$)</div><div class="stat-val c-green" id="b-lucro-rs">—</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:22px;">
+    <div class="card stat-card"><div class="stat-lbl">LUCRO (UN)</div><div class="stat-val c-green" id="b-lucro-un">—</div></div>
+    <div class="card stat-card"><div class="stat-lbl">ROI</div><div class="stat-val c-green" id="b-roi">—</div></div>
+    <div class="card stat-card"><div class="stat-lbl">WIN RATE</div><div class="stat-val c-white" id="b-winrate">—</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;padding:20px;">
+    <div class="sec-hdr">Histórico de Apostas</div>
+    <div class="tbl-wrap">
+      <table><thead><tr>
+        <th>Data</th><th>Confronto</th><th>Liga</th><th>Mercado</th><th class="r">Odd</th><th>Resultado</th>
+        <th class="r">Apostado</th><th class="r">Lucro R$</th><th>Ações</th>
+      </tr></thead><tbody id="tb-banca"></tbody></table>
+    </div>
+  </div>
+
+  <!-- 3 analytics cards -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;" id="banca-analytics">
+    <div class="card" style="padding:18px;">
+      <div class="sec-hdr" style="margin-bottom:12px;">🏆 Desempenho por Liga</div>
+      <div id="banca-liga-chart" style="font-size:13px;"></div>
+    </div>
+    <div class="card" style="padding:18px;">
+      <div class="sec-hdr" style="margin-bottom:12px;">📊 Desempenho por Mercado</div>
+      <div id="banca-mercado-chart" style="font-size:13px;"></div>
+    </div>
+    <div class="card" style="padding:18px;">
+      <div class="sec-hdr" style="margin-bottom:12px;">⏰ Melhor Faixa Horária</div>
+      <div id="banca-faixa-chart" style="font-size:13px;"></div>
+    </div>
+  </div>
+</div><!-- /page-banca -->
+
+
+<!-- ───────── DADOS BRUTOS ───────── -->
+<div class="page" id="page-dados">
+  <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
+    <input class="inp" id="srch" placeholder="🔍 Buscar por confronto ou liga…" oninput="debSearch()" style="flex:1;min-width:200px;">
+    <select class="inp" id="mkt-filter" onchange="dadosPage=1;fetchDados()" style="width:155px;">
+      <option value="">Todos Mercados</option>
+      <option value="Over">Over</option>
+      <option value="Under">Under</option>
+    </select>
+    <button class="btn btn-g" onclick="$('#up-quick').click()">⬆ Importar Excel</button>
+    <input type="file" id="up-quick" accept=".xlsx" style="display:none" onchange="quickUpload(this)">
+  </div>
+  <div class="card" style="padding:20px;">
+    <div class="sec-hdr" id="dados-title">Dados Brutos</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Liga</th><th>Data</th><th>Hora</th><th>Confronto</th>
+          <th>Mercado</th><th class="r">Odd</th><th>Resultado</th>
+          <th class="r">Lucro</th><th>Faixa Horária</th>
+        </tr></thead>
+        <tbody id="tb-dados"></tbody>
+      </table>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:8px;">
+      <span style="font-size:12px;color:var(--muted);" id="dados-info"></span>
+      <div style="display:flex;gap:6px;">
+        <button class="page-btn" id="dprev" onclick="dadosPage--;fetchDados()">← Anterior</button>
+        <button class="page-btn" id="dnext" onclick="dadosPage++;fetchDados()">Próximo →</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /page-dados -->
+
+
+<!-- ───────── ADMIN ───────── -->
+<div class="page" id="page-admin">
+  <div style="margin-bottom:22px;">
+    <h2 style="font-size:22px;font-weight:800;margin:0 0 4px;">Painel Administrativo</h2>
+    <p style="color:var(--muted);margin:0;font-size:13px;">Importe planilhas, gerencie e limpe dados.</p>
+  </div>
+
+  <div class="card" style="padding:22px;margin-bottom:16px;">
+    <div style="font-weight:700;font-size:15px;margin-bottom:14px;">👥 Aprovação de Cadastros</div>
+    <div id="pending-users" class="empty" style="padding:20px 0;">Nenhuma solicitação pendente.</div>
+  </div>
+
+  <div class="card" style="padding:22px;margin-bottom:16px;">
+    <div style="font-weight:700;font-size:15px;margin-bottom:8px;">Clientes Aprovados</div>
+    <p style="color:var(--muted);font-size:13px;margin:0 0 14px;">Contas aprovadas permanecem visíveis para edição, pausa, remoção e controle de validade.</p>
+    <div id="approved-users" class="empty" style="padding:20px 0;">Nenhum cliente aprovado ainda.</div>
+  </div>
+
+  <!-- upload -->
+  <div class="card" style="padding:22px;margin-bottom:16px;">
+    <div style="font-weight:700;font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:8px;">⬇ Importar Planilha Excel</div>
+    <p style="color:var(--muted);font-size:13px;margin:0 0 14px;">Selecione um arquivo Excel (.xlsx) contendo os dados das apostas.</p>
+    <div class="card2" style="padding:14px;margin-bottom:16px;font-size:13px;line-height:1.8;">
+      <div style="color:var(--green);font-weight:700;margin-bottom:6px;">✨ Correções Automáticas:</div>
+      <div style="color:var(--muted);">• Battle → Esoccer Battle</div>
+      <div style="color:var(--muted);">• GT Leagues/GT Leagues → Esoccer GT Leagues</div>
+      <div style="color:var(--muted);">• Jogador1 + Jogador2 → Confronto automático</div>
+      <div style="color:var(--muted);">• Validação de dados obrigatórios</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <button class="btn btn-g" onclick="$('#file-upload').click()">⬆ Selecionar Arquivo Excel</button>
+      <input type="file" id="file-upload" accept=".xlsx" style="display:none" onchange="uploadFile(this)">
+      <span id="up-status" style="font-size:13px;"></span>
+    </div>
+  </div>
+
+  <!-- clear all -->
+  <div class="card" style="padding:22px;margin-bottom:16px;">
+    <div style="font-weight:700;font-size:15px;margin-bottom:6px;color:#ff7070;">🗑 Limpar Todos os Dados</div>
+    <p style="color:#ff7070;font-size:13px;margin:0 0 14px;">⚠ Esta ação irá deletar TODOS os registros da planilha permanentemente.</p>
+    <button class="btn btn-r" onclick="clearAll()">🗑 Limpar Todos os Dados</button>
+  </div>
+
+  <!-- clear period -->
+  <div class="card" style="padding:22px;margin-bottom:20px;">
+    <div style="font-weight:700;font-size:15px;margin-bottom:14px;">📆 Limpar Planilha por Período</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+      <div>
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:5px;">Data Inicial</label>
+        <input type="date" class="inp" id="del-start">
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:5px;">Data Final</label>
+        <input type="date" class="inp" id="del-end">
+      </div>
+    </div>
+    <button class="btn btn-y" onclick="clearPeriod()">📆 Limpar Planilha</button>
+  </div>
+
+  <!-- manage table -->
+  <div class="card" style="padding:20px;">
+    <div class="sec-hdr" id="admin-title">Gerenciar Apostas</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>ID</th><th>Liga</th><th>Data</th><th>Confronto</th>
+          <th>Mercado</th><th class="r">Odd</th><th>Resultado</th><th>Ações</th>
+        </tr></thead>
+        <tbody id="tb-admin"></tbody>
+      </table>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:8px;">
+      <span style="font-size:12px;color:var(--muted);" id="admin-info"></span>
+      <div style="display:flex;gap:6px;">
+        <button class="page-btn" id="aprev" onclick="adminPage--;fetchAdmin()">← Anterior</button>
+        <button class="page-btn" id="anext" onclick="adminPage++;fetchAdmin()">Próximo →</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /page-admin -->
+
+</main>
+
+<!-- ════════ MODALS ════════ -->
+
+<!-- Login -->
+<div class="modal" id="modal-login">
+  <div class="card" style="padding:32px;width:360px;max-width:95vw;">
+    <div style="text-align:center;margin-bottom:24px;">
+      <div class="logo-box" style="margin:0 auto 12px;">🎯</div>
+      <div style="font-size:18px;font-weight:800;">Bazuka Bets</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px;" id="login-subtitle">Área Administrativa</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <button class="btn btn-g" id="auth-tab-login" style="flex:1;justify-content:center;" onclick="switchAuthTab('login')">Login</button>
+      <button class="btn btn-ghost" id="auth-tab-register" style="flex:1;justify-content:center;" onclick="switchAuthTab('register')">Cadastrar</button>
+    </div>
+    <div id="login-form-box">
+      <input class="inp" id="l-user" placeholder="Email" style="margin-bottom:10px;" onkeydown="if(event.key==='Enter')doLogin()">
+      <input class="inp" id="l-pass" type="password" placeholder="Senha" style="margin-bottom:18px;" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="btn btn-g" style="width:100%;justify-content:center;" onclick="doLogin()">Entrar</button>
+    </div>
+    <div id="register-form-box" style="display:none;">
+      <input class="inp" id="r-nome" placeholder="Nome" style="margin-bottom:10px;">
+      <input class="inp" id="r-email" placeholder="Email" style="margin-bottom:10px;">
+      <input class="inp" id="r-pass" type="password" placeholder="Senha" style="margin-bottom:18px;">
+      <button class="btn btn-g" style="width:100%;justify-content:center;" onclick="doRegister()">Solicitar Cadastro</button>
+    </div>
+    <div id="l-err" style="color:var(--red);font-size:13px;margin-top:10px;text-align:center;min-height:18px;"></div>
+    <button onclick="closeModal('modal-login')" style="background:none;border:none;color:var(--muted);font-size:12px;margin-top:10px;cursor:pointer;width:100%;text-align:center;">Fechar</button>
+  </div>
+</div>
+
+<!-- Edit -->
+<div class="modal" id="modal-edit">
+  <div class="card" style="padding:26px;width:500px;max-width:95vw;">
+    <div style="font-size:16px;font-weight:700;margin-bottom:20px;">✏️ Editar Aposta</div>
+    <input type="hidden" id="e-id">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px;">
+      <div><label style="font-size:11px;color:var(--muted);">Liga</label><input class="inp" id="e-liga" style="margin-top:4px;" list="dl-ligas" autocomplete="off"></div>
+      <div><label style="font-size:11px;color:var(--muted);">Data (dd/mm/aaaa)</label><input class="inp" id="e-data" style="margin-top:4px;" placeholder="dd/mm/aaaa"></div>
+      <div><label style="font-size:11px;color:var(--muted);">Hora</label><input class="inp" id="e-hora" style="margin-top:4px;" placeholder="HH:MM"></div>
+      <div><label style="font-size:11px;color:var(--muted);">Mercado</label>
+        <select class="inp" id="e-mercado" style="margin-top:4px;"><option>Over Partida</option><option>Under Partida</option><option>Over HT</option><option>Under HT</option><option>HC Jogador A</option><option>HC Jogador B</option><option>Over Jogador A</option><option>Under Jogador A</option><option>Over Jogador B</option><option>Under Jogador B</option><option>HC Europeu HT</option><option>HC Europeu Partida</option></select></div>
+    </div>
+    <div style="margin-bottom:11px;"><label style="font-size:11px;color:var(--muted);">Confronto</label><input class="inp" id="e-confronto" style="margin-top:4px;" list="dl-confrontos" autocomplete="off"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:20px;">
+      <div><label style="font-size:11px;color:var(--muted);">Odd</label><input class="inp" id="e-odd" type="number" step="0.01" style="margin-top:4px;"></div>
+      <div><label style="font-size:11px;color:var(--muted);">Resultado</label>
+        <select class="inp" id="e-resultado" style="margin-top:4px;">
+          <option>Green</option><option>Meio Green</option><option>Red</option>
+          <option>Meio Red</option><option>Reembolso</option><option>Pendente</option><option>-</option>
+        </select></div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-g" onclick="saveEdit()">Salvar</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal-banca-edit">
+  <div class="card" style="padding:26px;width:520px;max-width:95vw;">
+    <div style="font-size:16px;font-weight:700;margin-bottom:20px;">Editar Aposta da Banca</div>
+    <input type="hidden" id="be-id">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px;">
+      <div><label style="font-size:11px;color:var(--muted);">Data</label><input class="inp" id="be-data" type="date" style="margin-top:4px;"></div>
+      <div><label style="font-size:11px;color:var(--muted);">Hora</label><input class="inp" id="be-hora" type="time" style="margin-top:4px;"></div>
+      <div><label style="font-size:11px;color:var(--muted);">Liga</label><input class="inp" id="be-liga" style="margin-top:4px;" list="dl-ligas" autocomplete="off"></div>
+      <div><label style="font-size:11px;color:var(--muted);">Mercado</label><select class="inp" id="be-mercado" style="margin-top:4px;"><option>Over Partida</option><option>Under Partida</option><option>Over HT</option><option>Under HT</option><option>HC Jogador A</option><option>HC Jogador B</option><option>Over Jogador A</option><option>Under Jogador A</option><option>Over Jogador B</option><option>Under Jogador B</option><option>HC Europeu HT</option><option>HC Europeu Partida</option></select></div>
+    </div>
+    <div style="margin-bottom:11px;"><label style="font-size:11px;color:var(--muted);">Confronto</label><input class="inp" id="be-confronto" style="margin-top:4px;" list="dl-confrontos" autocomplete="off"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:20px;">
+      <div><label style="font-size:11px;color:var(--muted);">Odd</label><input class="inp" id="be-odd" type="number" step="0.01" style="margin-top:4px;"></div>
+      <div><label style="font-size:11px;color:var(--muted);">Resultado</label><select class="inp" id="be-resultado" style="margin-top:4px;"><option>Green</option><option>Meio Green</option><option>Red</option><option>Meio Red</option><option>Reembolso</option><option>Pendente</option></select></div>
+      <div><label style="font-size:11px;color:var(--muted);">Valor Apostado</label><input class="inp" id="be-valor" type="number" step="0.01" style="margin-top:4px;"></div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-g" onclick="saveBancaEdit()">Salvar</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-banca-edit')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal-user-edit">
+  <div class="card" style="padding:26px;width:520px;max-width:95vw;">
+    <div style="font-size:16px;font-weight:700;margin-bottom:20px;">Gerenciar Cliente</div>
+    <input type="hidden" id="u-id">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px;">
+      <div><label style="font-size:11px;color:var(--muted);">Nome</label><input class="inp" id="u-nome" style="margin-top:4px;"></div>
+      <div><label style="font-size:11px;color:var(--muted);">Email</label><input class="inp" id="u-email" style="margin-top:4px;"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:20px;">
+      <div><label style="font-size:11px;color:var(--muted);">Status</label><select class="inp" id="u-status" style="margin-top:4px;"><option value="active">Ativa</option><option value="paused">Pausada</option><option value="standby">Stand By</option></select></div>
+      <div><label style="font-size:11px;color:var(--muted);">Dias Ativa</label><input class="inp" id="u-days" type="number" min="0" step="1" style="margin-top:4px;" placeholder="0 = sem prazo"></div>
+    </div>
+    <div id="u-meta" style="font-size:12px;color:var(--muted);margin-bottom:20px;"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-g" onclick="saveUserEdit()">Salvar</button>
+      <button class="btn btn-y" onclick="quickUserAction('pause')">Pausar</button>
+      <button class="btn btn-ghost" onclick="quickUserAction('activate')">Ativar</button>
+      <button class="btn btn-r" onclick="deleteUser()">Remover</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-user-edit')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Autocomplete datalists -->
+<datalist id="dl-confrontos"></datalist>
+<datalist id="dl-ligas"></datalist>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// Utilities
+// ════════════════════════════════════════════════════════════
+function $(id) { return document.getElementById(id); }
+
+function openModal(id)  { $(id).classList.add('on');    }
+function closeModal(id) { $(id).classList.remove('on'); }
+
+function applyBranding() {
+  document.querySelectorAll('.logo-box').forEach(logoBox => {
+    logoBox.textContent = '';
+    logoBox.style.backgroundImage = "url('/static/img/logo.png')";
+    logoBox.style.backgroundSize = 'cover';
+    logoBox.style.backgroundPosition = 'center';
+    logoBox.style.backgroundRepeat = 'no-repeat';
+  });
+}
+
+function bindUploadTriggers() {
+  document.querySelectorAll('button').forEach(btn => {
+    const label = (btn.textContent || '').trim();
+    if (label.includes('Importar Excel')) {
+      const replacement = document.createElement('label');
+      replacement.setAttribute('for', 'up-quick');
+      replacement.className = btn.className;
+      replacement.textContent = 'Importar Excel';
+      replacement.style.cursor = 'pointer';
+      replacement.style.display = 'inline-flex';
+      btn.replaceWith(replacement);
+    }
+    if (label.includes('Selecionar Arquivo Excel')) {
+      const replacement = document.createElement('label');
+      replacement.setAttribute('for', 'file-upload');
+      replacement.className = btn.className;
+      replacement.textContent = 'Selecionar Arquivo Excel';
+      replacement.style.cursor = 'pointer';
+      replacement.style.display = 'inline-flex';
+      btn.replaceWith(replacement);
+    }
+  });
+}
+
+let _toastTimer;
+function toast(msg, type='ok') {
+  const el = $('toast');
+  el.textContent = msg;
+  el.style.borderColor = type === 'ok' ? 'var(--green2)' : type === 'err' ? 'var(--red)' : '#e6a817';
+  el.style.color = type === 'ok' ? 'var(--green)' : type === 'err' ? 'var(--red)' : '#f5c842';
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+function fmtLucro(v) {
+  const s = (v >= 0 ? '+' : '') + v;
+  return `<span class="${v >= 0 ? 'rg' : 'rr'}">${s}</span>`;
+}
+function fmtROI(v) {
+  const s = (v >= 0 ? '+' : '') + v + '%';
+  return `<span class="${v >= 0 ? 'rg' : 'rr'}">${s}</span>`;
+}
+function fmtDateInput(dateStr) {
+  if (!dateStr || !dateStr.includes('/')) return '';
+  const [d, m, y] = dateStr.split('/');
+  return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+}
+function fmtDateView(dateStr) {
+  if (!dateStr || !dateStr.includes('-')) return dateStr || '';
+  const [y, m, d] = dateStr.split('-');
+  return `${d}/${m}/${y}`;
+}
+function fmtActiveUntil(value) {
+  if (!value) return 'Sem vencimento definido';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString('pt-BR');
+}
+function userStatusLabel(status) {
+  return ({active:'Ativa', paused:'Pausada', standby:'Stand By', pending:'Pendente'})[status] || status || 'Pendente';
+}
+function userStatusClass(status) {
+  return `status-chip status-${status || 'pending'}`;
+}
+function rankCls(i) {
+  return ['rn-1','rn-2','rn-3','rn-x','rn-x'][i] ?? 'rn-x';
+}
+function rankNum(i) {
+  return `<div class="rank-num ${rankCls(i)}">${i+1}</div>`;
+}
+
+// ════════════════════════════════════════════════════════════
+// Navigation
+// ════════════════════════════════════════════════════════════
+const NAV_IDS = ['resumo','mensal','banca','dados','admin'];
+let authUser = null;
+let bancaRowsById = {};
+let approvedUsersById = {};
+let adminRowsById = {};
+function goPage(p) {
+  NAV_IDS.forEach(id => {
+    document.getElementById('page-' + id)?.classList.remove('on');
+    const nb = document.getElementById('nb-' + id);
+    if (nb) { nb.classList.remove('active'); nb.classList.add('passive'); }
+  });
+  document.getElementById('page-' + p).classList.add('on');
+  const nb = document.getElementById('nb-' + p);
+  if (nb) { nb.classList.add('active'); nb.classList.remove('passive'); }
+  if (p === 'resumo')  loadDashboard();
+  if (p === 'mensal')  initMensal();
+  if (p === 'banca')   { loadMinhaBanca(); loadAutocomplete(); }
+  if (p === 'dados')   { dadosPage = 1; fetchDados(); }
+  if (p === 'admin')   { adminPage = 1; fetchAdmin(); fetchPendingUsers(); }
+}
+
+// ════════════════════════════════════════════════════════════
+// Auth
+// ════════════════════════════════════════════════════════════
+async function doLogin() {
+  $('l-err').textContent = '';
+  const u = $('l-user').value.trim(), p = $('l-pass').value;
+  try {
+    const r = await fetch('/api/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({username: u, password: p})
+    });
+    const d = await r.json();
+    if (d.success) {
+      closeModal('modal-login');
+      setLoggedIn(true, d.user || null);
+      switchAuthTab('login');
+      toast('Login realizado com sucesso!');
+    } else {
+      $('l-err').textContent = d.error || 'Credenciais inválidas';
+    }
+  } catch(e) { $('l-err').textContent = 'Erro de conexão'; }
+}
+
+async function doRegister() {
+  $('l-err').textContent = '';
+  try {
+    const r = await fetch('/api/register', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({nome: $('r-nome').value.trim(), email: $('r-email').value.trim(), password: $('r-pass').value})
+    });
+    const d = await r.json();
+    if (d.success) {
+      $('l-err').style.color = 'var(--green)';
+      $('l-err').textContent = d.message || 'Cadastro enviado!';
+      $('r-nome').value = '';
+      $('r-email').value = '';
+      $('r-pass').value = '';
+    } else {
+      $('l-err').style.color = 'var(--red)';
+      $('l-err').textContent = d.error || 'Erro ao cadastrar';
+    }
+  } catch(e) { $('l-err').textContent = 'Erro de conexão'; }
+}
+
+async function doLogout() {
+  await fetch('/api/logout', {method:'POST'});
+  setLoggedIn(false, null);
+  goPage('resumo');
+  toast('Logout realizado.', 'warn');
+}
+
+function switchAuthTab(tab) {
+  $('login-form-box').style.display = tab === 'login' ? '' : 'none';
+  $('register-form-box').style.display = tab === 'register' ? '' : 'none';
+  $('auth-tab-login').className = tab === 'login' ? 'btn btn-g' : 'btn btn-ghost';
+  $('auth-tab-register').className = tab === 'register' ? 'btn btn-g' : 'btn btn-ghost';
+  $('login-subtitle').textContent = tab === 'login' ? 'Área de Acesso' : 'Solicitação de Cadastro';
+  $('l-err').textContent = '';
+  $('l-err').style.color = 'var(--red)';
+}
+
+function setLoggedIn(on, user=null) {
+  authUser = on ? user : null;
+  $('nb-login').style.display  = on ? 'none' : '';
+  $('nb-logout').style.display = on ? '' : 'none';
+  $('nb-dados').style.display  = on && user && user.role === 'admin' ? '' : 'none';
+  $('nb-admin').style.display  = on && user && user.role === 'admin' ? '' : 'none';
+  $('nb-banca').style.display  = on ? '' : 'none';
+}
+
+// ════════════════════════════════════════════════════════════
+// Charts
+// ════════════════════════════════════════════════════════════
+let cMensal = null, cAnual = null;
+const CHART_OPTS = {
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { grid: { color: '#1a3028' }, ticks: { color: '#6b9478', font: { size: 11 } } },
+    y: { grid: { color: '#1a3028' }, ticks: { color: '#6b9478', font: { size: 11 } } },
+  },
+  responsive: true,
+  maintainAspectRatio: true,
+};
+
+function barColor(v) { return v >= 0 ? '#00c853' : '#ff4444'; }
+
+function drawChart(canvasId, ref, labels, data) {
+  if (ref) ref.destroy();
+  const ctx = $(canvasId);
+  return new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: data.map(barColor),
+        borderRadius: 4,
+        borderSkipped: false,
+      }]
+    },
+    options: CHART_OPTS
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+// Dashboard
+// ════════════════════════════════════════════════════════════
+async function loadDashboard() {
+  try {
+    const d = await fetch('/api/dashboard').then(r => r.json());
+    fillStats(d.stats, 'r');
+    cMensal = drawChart('chart-mensal', cMensal,
+      d.monthly.map(x => x.mes), d.monthly.map(x => x.resultado));
+    cAnual  = drawChart('chart-anual',  cAnual,
+      d.annual.map(x => x.ano),   d.annual.map(x => x.resultado));
+    fillMonthlyTable(d.monthly);
+    fillFaixas('tb-faixas',    d.faixas);
+    fillLigas('tb-ligas',      d.ligas);
+    fillLM('tb-ligamercado',   d.liga_mercado);
+    applyRankings(d.rankings, '');
+  } catch(e) { console.error('loadDashboard', e); }
+}
+
+function fillStats(s, px) {
+  if (!s || s.entradas === undefined) return;
+  $(px+'-entradas').textContent = s.entradas;
+  $(px+'-greens').textContent   = s.greens;
+  $(px+'-reds').textContent     = s.reds;
+  const lEl = $(px+'-lucro');
+  if (lEl) {
+    lEl.textContent  = (s.lucro >= 0 ? '+' : '') + s.lucro + ' Un';
+    lEl.className    = 'stat-val ' + (s.lucro >= 0 ? 'c-green' : 'c-red');
+  }
+  const rEl = $(px+'-roi');
+  if (rEl) {
+    rEl.textContent = s.roi + '%';
+    rEl.className   = 'stat-val ' + (s.roi >= 0 ? 'c-green' : 'c-red');
+  }
+  const wEl = $(px+'-winrate');
+  if (wEl) wEl.textContent = s.win_rate + '%';
+  const wsEl = $(px+'-winrate-sub');
+  if (wsEl) wsEl.textContent = s.greens + ' de ' + s.entradas + ' válidas';
+  const oEl = $(px+'-odd');
+  if (oEl) oEl.textContent = s.odd_media;
+}
+
+function fillMonthlyTable(data) {
+  $('tb-monthly').innerHTML = data.length
+    ? data.map(r => `<tr>
+        <td>${r.mes}</td>
+        <td class="r">${r.entradas}</td>
+        <td class="r">${r.retorno}</td>
+        <td class="r">${fmtLucro(r.resultado)}</td>
+        <td class="r">${r.odd_media}</td>
+        <td class="r">${fmtROI(r.roi)}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="6" class="empty">Sem dados</td></tr>';
+}
+
+function fillFaixas(tbId, data) {
+  $(tbId).innerHTML = data.map(r => `<tr>
+    <td>${r.faixa}</td><td class="r">${r.entradas}</td>
+    <td class="r">${fmtLucro(r.resultado)}</td><td class="r">${fmtROI(r.roi)}</td>
+  </tr>`).join('');
+}
+
+function fillLigas(tbId, data) {
+  $(tbId).innerHTML = data.length
+    ? data.map(r => `<tr>
+        <td><b>${r.liga}</b></td><td class="r">${r.entradas}</td>
+        <td class="r">${fmtLucro(r.resultado)}</td><td class="r">${fmtROI(r.roi)}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="4" class="empty">Sem dados</td></tr>';
+}
+
+function fillLM(tbId, data) {
+  $(tbId).innerHTML = data.length
+    ? data.map(r => `<tr>
+        <td><b>${r.liga_mercado}</b></td><td class="r">${r.entradas}</td>
+        <td class="r">${fmtLucro(r.resultado)}</td><td class="r">${fmtROI(r.roi)}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="4" class="empty">Sem dados</td></tr>';
+}
+
+function applyRankings(r, sfx) {
+  const s = sfx ? '-' + sfx : '';
+  fillJogadores('top-jogadores'+s, r.top_jogadores, true);
+  fillJogadores('bot-jogadores'+s, r.bot_jogadores, false);
+  fillConfrontos('top-confrontos'+s, r.top_confrontos, true);
+  fillConfrontos('bot-confrontos'+s, r.bot_confrontos, false);
+}
+
+function fillJogadores(id, data, isTop) {
+  const el = $(id);
+  if (!el) return;
+  el.innerHTML = data && data.length
+    ? data.map((j, i) => `<div class="rank-item">
+        ${rankNum(i)}
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;">${j.nome}</div>
+          <div style="font-size:12px;color:var(--muted);">${j.apostas} apostas</div>
+        </div>
+        <span style="font-weight:700;" class="${isTop ? 'rg' : 'rr'}">${isTop ? '+' : ''}${j.lucro}</span>
+      </div>`).join('')
+    : '<div class="empty">Sem dados</div>';
+}
+
+function fillConfrontos(id, data, isTop) {
+  const el = $(id);
+  if (!el) return;
+  el.innerHTML = data && data.length
+    ? data.map((c, i) => `<div class="rank-item">
+        ${rankNum(i)}
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;">${c.confronto}</div>
+          <div style="font-size:12px;color:var(--muted);">${c.partidas} partidas</div>
+        </div>
+        <span style="font-weight:700;" class="${isTop ? 'rg' : 'rr'}">${isTop ? '+' : ''}${c.lucro}</span>
+      </div>`).join('')
+    : '<div class="empty">Sem dados</div>';
+}
+
+// ─── Ranking filters (resumo) ────────────────────────────────────────────────
+const _rfState = { tj:'Todos', bj:'Todos', tc:'Todos', bc:'Todos' };
+
+async function rfilt(btn, type, mercado) {
+  btn.parentNode.querySelectorAll('.fbtn').forEach(b => { b.classList.remove('on'); b.classList.add('off'); });
+  btn.classList.remove('off'); btn.classList.add('on');
+  _rfState[type] = mercado;
+  const d = await fetch(`/api/rankings_filter?mercado=${mercado}`).then(r => r.json());
+  if      (type === 'tj') fillJogadores('top-jogadores', d.top_jogadores, true);
+  else if (type === 'bj') fillJogadores('bot-jogadores', d.bot_jogadores, false);
+  else if (type === 'tc') fillConfrontos('top-confrontos', d.top_confrontos, true);
+  else if (type === 'bc') fillConfrontos('bot-confrontos', d.bot_confrontos, false);
+}
+
+// ─── Ranking filters (mensal) ────────────────────────────────────────────────
+async function rfiltM(btn, type, mercado) {
+  btn.parentNode.querySelectorAll('.fbtn').forEach(b => { b.classList.remove('on'); b.classList.add('off'); });
+  btn.classList.remove('off'); btn.classList.add('on');
+  const mes = $('mes-select').value;
+  let url = `/api/rankings_filter_mes?mercado=${mercado}&mes=${encodeURIComponent(mes)}`;
+  if (mes === '__periodo__') {
+    const di = $('period-start').value.split('-').reverse().join('/');
+    const df = $('period-end').value.split('-').reverse().join('/');
+    url = `/api/rankings_filter_periodo?mercado=${mercado}&data_inicial=${encodeURIComponent(di)}&data_final=${encodeURIComponent(df)}`;
+  }
+  const d   = await fetch(url).then(r => r.json());
+  if      (type === 'tj') fillJogadores('top-jogadores-m', d.top_jogadores, true);
+  else if (type === 'bj') fillJogadores('bot-jogadores-m', d.bot_jogadores, false);
+  else if (type === 'tc') fillConfrontos('top-confrontos-m', d.top_confrontos, true);
+  else if (type === 'bc') fillConfrontos('bot-confrontos-m', d.bot_confrontos, false);
+}
+
+// ════════════════════════════════════════════════════════════
+// Mensal
+// ════════════════════════════════════════════════════════════
+async function initMensal() {
+  const meses = await fetch('/api/meses').then(r => r.json());
+  const sel   = $('mes-select');
+  sel.innerHTML = '<option value="">— selecione —</option>' +
+    '<option value="__periodo__">Por Período</option>' +
+    meses.map(m => `<option value="${m}">${m}</option>`).join('');
+  if (meses.length) {
+    sel.value = meses[meses.length - 1];
+    togglePeriodMode();
+    loadMensal();
+  }
+}
+
+function togglePeriodMode() {
+  $('period-filter-box').style.display = $('mes-select').value === '__periodo__' ? '' : 'none';
+}
+
+// ── Diário pagination state ──────────────────────────────────
+let _diarioAll  = [];
+let diarioPage  = 1;
+const DIARIO_PER_PAGE = 50;
+
+function renderDiarioPage() {
+  const total = _diarioAll.length;
+  const pages = Math.max(1, Math.ceil(total / DIARIO_PER_PAGE));
+  diarioPage  = Math.min(Math.max(1, diarioPage), pages);
+  const start = (diarioPage - 1) * DIARIO_PER_PAGE;
+  const slice = _diarioAll.slice(start, start + DIARIO_PER_PAGE);
+
+  $('tb-diario').innerHTML = slice.length
+    ? slice.map(r => `<tr>
+        <td>${r.data}</td><td class="r">${r.entradas}</td>
+        <td class="r">${fmtLucro(r.lucro)}</td><td class="r">${fmtROI(r.roi)}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="4" class="empty">Sem dados</td></tr>';
+
+  const pag = $('diario-pagination');
+  const info = $('diario-page-info');
+  if (total <= DIARIO_PER_PAGE) {
+    pag.style.display  = 'none';
+    info.textContent   = '';
+  } else {
+    pag.style.display  = '';
+    info.textContent   = `Página ${diarioPage} de ${pages} (${total} dias)`;
+    $('diario-prev').disabled = diarioPage <= 1;
+    $('diario-next').disabled = diarioPage >= pages;
+  }
+}
+
+// ── Logs pagination state ────────────────────────────────────
+let _logsAll       = [];
+let logsPage       = 1;
+let _logsDi        = '';   // dd/mm/yyyy
+let _logsDf        = '';   // dd/mm/yyyy
+const LOGS_PER_PAGE = 50;
+
+// Converte "mm/yyyy" (formato da API de meses) para datas inicial e final dd/mm/yyyy
+function mesParaIntervalo(mes) {
+  const [m, y] = mes.split('/');
+  const mm = m.padStart(2, '0');
+  const lastDay = new Date(parseInt(y), parseInt(m), 0).getDate();
+  return { di: `01/${mm}/${y}`, df: `${lastDay}/${mm}/${y}` };
+}
+
+// Converte "dd/mm/yyyy" para Date para comparação
+function parseDMY(s) {
+  const [d, m, y] = s.split('/');
+  return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+}
+
+// Busca todas as apostas do /api/dados_brutos e filtra por data no cliente
+async function fetchAllDados() {
+  const diDate = parseDMY(_logsDi);
+  const dfDate = parseDMY(_logsDf);
+  let all = [];
+  let page = 1;
+
+  while (true) {
+    const d = await fetch(`/api/dados_brutos?search=&mercado=&page=${page}`).then(r => r.json());
+    if (!d.data || !d.data.length) break;
+
+    // Log da primeira página para diagnóstico
+    if (page === 1) console.log('[Logs] Primeira entrada da API:', d.data[0], '| total:', d.total, '| per_page:', d.per_page);
+
+    for (const r of d.data) {
+      if (!r.data) continue;
+      const dt = parseDMY(r.data);
+      if (dt >= diDate && dt <= dfDate) all.push(r);
+    }
+
+    const perPage  = d.per_page || d.data.length || 50;
+    const total    = d.total || 0;
+    const totalPages = Math.ceil(total / perPage);
+    console.log(`[Logs] Página ${page}/${totalPages} — coletados até agora: ${all.length}`);
+    if (page >= totalPages || !total) break;
+    page++;
+  }
+  return all;
+}
+
+async function loadLogs() {
+  if (!_logsDi || !_logsDf) {
+    $('tb-logs').innerHTML = '<tr><td colspan="9" class="empty">Selecione um período para ver os logs.</td></tr>';
+    $('logs-info').textContent = '';
+    $('logs-page-info').textContent = '';
+    $('logs-prev').parentElement.style.display = 'none';
+    return;
+  }
+
+  $('tb-logs').innerHTML = '<tr><td colspan="9" class="loading">Carregando logs…</td></tr>';
+  $('logs-info').textContent = 'Carregando…';
+
+  try {
+    console.log('[Logs] Intervalo:', _logsDi, '→', _logsDf);
+    const all = await fetchAllDados();
+    console.log('[Logs] Total encontrado:', all.length, '| Exemplo:', all[0]);
+
+    // Ordena do mais recente para o mais antigo
+    _logsAll = all.slice().reverse();
+
+    logsPage = 1;
+    renderLogsPage();
+  } catch(e) {
+    console.error('loadLogs', e);
+    $('tb-logs').innerHTML = '<tr><td colspan="9" class="empty">Erro ao carregar logs.</td></tr>';
+  }
+}
+
+function renderLogsPage() {
+  const total = _logsAll.length;
+  const pages = Math.max(1, Math.ceil(total / LOGS_PER_PAGE));
+  logsPage    = Math.min(Math.max(1, logsPage), pages);
+  const start = (logsPage - 1) * LOGS_PER_PAGE;
+  const slice = _logsAll.slice(start, start + LOGS_PER_PAGE);
+
+  $('tb-logs').innerHTML = slice.length
+    ? slice.map(r => `<tr>
+        <td>${r.liga}</td>
+        <td>${r.data}</td>
+        <td>${r.hora || '—'}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;">${r.confronto}</td>
+        <td><span class="badge badge-${(r.mercado||'').toLowerCase()}">${r.mercado}</span></td>
+        <td class="r">${r.odd}</td>
+        <td><span style="color:${RES_COLOR[r.resultado]||'var(--muted)'};">${RES_ICON[r.resultado]||r.resultado}</span></td>
+        <td class="r">${fmtLucro(r.lucro)}</td>
+        <td style="color:var(--muted);font-size:12px;">${r.faixa_horaria || '—'}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="9" class="empty">Nenhuma aposta no período</td></tr>';
+
+  $('logs-info').textContent = total > 0 ? `${total} registros` : '';
+  const showPag = total > LOGS_PER_PAGE;
+  $('logs-page-info').textContent = showPag
+    ? `Página ${logsPage} de ${pages} (${total} apostas)`
+    : (total > 0 ? `${total} apostas` : '');
+  $('logs-prev').parentElement.style.display = showPag ? '' : 'none';
+  $('logs-prev').disabled = logsPage <= 1;
+  $('logs-next').disabled = logsPage >= pages;
+}
+
+async function loadMensal() {
+  const mes = $('mes-select').value;
+  if (!mes) return;
+  $('rank-mes-titulo').textContent = mes === '__periodo__' ? 'Período' : mes;
+  try {
+    let d;
+    if (mes === '__periodo__') {
+      const di = $('period-start').value;
+      const df = $('period-end').value;
+      if (!di || !df) { toast('Selecione data inicial e final.', 'warn'); return; }
+      const diFmt = di.split('-').reverse().join('/');
+      const dfFmt = df.split('-').reverse().join('/');
+      d = await fetch(`/api/periodo?data_inicial=${encodeURIComponent(diFmt)}&data_final=${encodeURIComponent(dfFmt)}`).then(r => r.json());
+      $('period-label').textContent = d.error ? '' : `Exibindo ${d.total} apostas para o período ${d.label}`;
+      _logsDi = diFmt;
+      _logsDf = dfFmt;
+    } else {
+      d = await fetch(`/api/mensal/${mes}`).then(r => r.json());
+      $('period-label').textContent = '';
+      const iv = mesParaIntervalo(mes);
+      _logsDi = iv.di;
+      _logsDf = iv.df;
+    }
+    if (d.error) { toast(d.error, 'err'); return; }
+    fillStats(d.stats, 'm');
+
+    // Diário com paginação
+    _diarioAll = (d.diario || []);
+    diarioPage = 1;
+    renderDiarioPage();
+
+    fillFaixas('tb-faixas-m',    d.faixas);
+    fillLigas('tb-ligas-m',      d.ligas);
+    fillLM('tb-ligamercado-m',   d.liga_mercado);
+    applyRankings(d.rankings, 'm');
+
+    // Logs: busca da API de dados brutos filtrando por data
+    loadLogs();
+  } catch(e) { console.error('loadMensal', e); }
+}
+
+// ════════════════════════════════════════════════════════════
+// Dados Brutos
+// ════════════════════════════════════════════════════════════
+let dadosPage = 1;
+let _srchTimer;
+function debSearch() { clearTimeout(_srchTimer); _srchTimer = setTimeout(() => { dadosPage=1; fetchDados(); }, 350); }
+
+const RES_ICON = {
+  'Green':      '✅ Green',
+  'Meio Green': '🔁✅ Meio Green',
+  'Red':        '❌ Red',
+  'Meio Red':   '🔁❌ Meio Red',
+  'Reembolso':  '🔄 Reembolso',
+  'Pendente':   '⏳ Pendente',
+  '-':          '—'
+};
+const RES_COLOR = {
+  'Green':'#00e676','Meio Green':'#69f0ae',
+  'Red':'#ff4444','Meio Red':'#ff8a80',
+  'Reembolso':'#ffd740','Pendente':'#ffd740'
+};
+
+async function fetchDados() {
+  const search  = $('srch').value.trim();
+  const mercado = $('mkt-filter').value;
+  try {
+    const d = await fetch(`/api/dados_brutos?search=${encodeURIComponent(search)}&mercado=${encodeURIComponent(mercado)}&page=${dadosPage}`).then(r => r.json());
+    $('dados-title').textContent = `Dados Brutos (${d.total} registros)`;
+    const pages = Math.max(1, Math.ceil(d.total / d.per_page));
+    $('tb-dados').innerHTML = d.data.length
+      ? d.data.map(r => `<tr>
+          <td>${r.liga}</td>
+          <td>${r.data}</td>
+          <td>${r.hora}</td>
+          <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;">${r.confronto}</td>
+          <td><span class="badge badge-${(r.mercado||'').toLowerCase()}">${r.mercado}</span></td>
+          <td class="r">${r.odd}</td>
+          <td><span style="color:${RES_COLOR[r.resultado]||'var(--muted)'};">${RES_ICON[r.resultado]||r.resultado}</span></td>
+          <td class="r">${fmtLucro(r.lucro)}</td>
+          <td style="color:var(--muted);font-size:12px;">${r.faixa_horaria}</td>
+        </tr>`).join('')
+      : '<tr><td colspan="9" class="empty">Nenhum registro encontrado</td></tr>';
+    $('dados-info').textContent = `Página ${dadosPage} de ${pages} (${d.total} registros)`;
+    $('dprev').disabled = dadosPage <= 1;
+    $('dnext').disabled = dadosPage >= pages;
+  } catch(e) { console.error('fetchDados', e); }
+}
+
+// ════════════════════════════════════════════════════════════
+// Admin
+// ════════════════════════════════════════════════════════════
+let adminPage = 1;
+
+function fillBancaStats(s) {
+  $('b-entradas').textContent = s.entradas ?? 0;
+  $('b-total').textContent = `R$ ${(s.total_apostado ?? 0).toFixed(2)}`;
+  $('b-retorno').textContent = `R$ ${(s.retorno_total ?? 0).toFixed(2)}`;
+
+  const lucroRs = s.lucro_rs ?? 0;
+  const elLucroRs = $('b-lucro-rs');
+  elLucroRs.textContent = `${lucroRs >= 0 ? '+' : ''}R$ ${lucroRs.toFixed(2)}`;
+  elLucroRs.className = 'stat-val ' + (lucroRs >= 0 ? 'c-green' : 'c-red');
+
+  const lucroUn = s.lucro_un ?? 0;
+  const elLucroUn = $('b-lucro-un');
+  elLucroUn.textContent = `${lucroUn >= 0 ? '+' : ''}${lucroUn.toFixed(2)}`;
+  elLucroUn.className = 'stat-val ' + (lucroUn >= 0 ? 'c-green' : 'c-red');
+
+  const roi = s.roi ?? 0;
+  const elRoi = $('b-roi');
+  elRoi.textContent = `${roi.toFixed(2)}%`;
+  elRoi.className = 'stat-val ' + (roi >= 0 ? 'c-green' : 'c-red');
+
+  $('b-winrate').textContent = `${(s.win_rate ?? 0).toFixed(2)}%`;
+}
+
+function toggleBancaForm(force) {
+  const el = $('banca-form-card');
+  el.style.display = typeof force === 'boolean' ? (force ? '' : 'none') : (el.style.display === 'none' ? '' : 'none');
+}
+
+async function loadMinhaBanca() {
+  try {
+    const d = await fetch('/api/minha_banca').then(r => r.json());
+    if (d.error) return;
+    bancaRowsById = Object.fromEntries((d.apostas || []).map(r => [r.id, r]));
+    fillBancaStats(d.stats || {});
+    $('tb-banca').innerHTML = d.apostas.length
+      ? d.apostas.map(r => `<tr>
+          <td>${r.data}<div style="font-size:12px;color:var(--muted);">${r.hora || ''}</div></td>
+          <td>${r.confronto}</td>
+          <td>${r.liga}</td>
+          <td><span class="badge badge-${(r.mercado||'').toLowerCase()}">${r.mercado}</span></td>
+          <td class="r">${r.odd}</td>
+          <td><span style="color:${RES_COLOR[r.resultado]||'var(--muted)'};">${RES_ICON[r.resultado]||r.resultado}</span></td>
+          <td class="r">R$ ${Number(r.valor_apostado || 0).toFixed(2)}</td>
+          <td class="r">${fmtLucro(r.lucro)}</td>
+          <td style="display:flex;gap:6px;">
+            <button class="page-btn" onclick="openBancaEdit('${r.id}')">Editar</button>
+            <button class="page-btn" onclick="deleteBanca('${r.id}')">Excluir</button>
+          </td>
+        </tr>`).join('')
+      : '<tr><td colspan="9" class="empty">Nenhuma aposta cadastrada</td></tr>';
+    renderBancaAnalytics(d.apostas || []);
+    loadAutocomplete();
+  } catch(e) { console.error('loadMinhaBanca', e); }
+}
+
+async function saveBanca() {
+  const di = $('b-data').value;
+  if (!di) { toast('Selecione a data da aposta.', 'warn'); return; }
+  const body = {
+    data: di.split('-').reverse().join('/'),
+    hora: $('b-hora').value,
+    confronto: $('b-confronto').value,
+    liga: $('b-liga').value,
+    mercado: $('b-mercado').value,
+    odd: $('b-odd').value,
+    resultado: $('b-resultado').value,
+    valor_apostado: $('b-valor').value
+  };
+  const r = await fetch('/api/minha_banca', {
+    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+  });
+  const d = await r.json();
+  if (!r.ok || d.error) { toast(d.error || 'Erro ao salvar aposta.', 'err'); return; }
+  ['b-data','b-hora','b-confronto','b-liga','b-odd','b-valor'].forEach(id => $(id).value = '');
+  $('b-resultado').value = 'Pendente';
+  $('b-mercado').value = 'Over Partida';
+  toggleBancaForm(false);
+  loadMinhaBanca();
+  toast('Aposta cadastrada com sucesso!');
+}
+
+async function deleteBanca(id) {
+  if (!confirm('Excluir esta aposta da sua banca?')) return;
+  await fetch(`/api/minha_banca/${id}`, {method:'DELETE'});
+  loadMinhaBanca();
+  toast('Aposta excluída.', 'warn');
+}
+
+function openBancaEdit(id) {
+  const r = bancaRowsById[id];
+  if (!r) return;
+  $('be-id').value = r.id;
+  $('be-data').value = fmtDateInput(r.data);
+  $('be-hora').value = r.hora || '';
+  $('be-liga').value = r.liga || '';
+  $('be-confronto').value = r.confronto || '';
+  $('be-mercado').value = r.mercado || 'Over';
+  $('be-odd').value = r.odd ?? '';
+  $('be-resultado').value = r.resultado || 'Pendente';
+  $('be-valor').value = r.valor_apostado ?? '';
+  openModal('modal-banca-edit');
+}
+
+async function saveBancaEdit() {
+  const id = $('be-id').value;
+  const date = $('be-data').value;
+  if (!id || !date) { toast('Preencha a data da aposta.', 'warn'); return; }
+  const body = {
+    data: fmtDateView(date),
+    hora: $('be-hora').value,
+    liga: $('be-liga').value,
+    confronto: $('be-confronto').value,
+    mercado: $('be-mercado').value,
+    odd: $('be-odd').value,
+    resultado: $('be-resultado').value,
+    valor_apostado: $('be-valor').value
+  };
+  const r = await fetch(`/api/minha_banca/${id}`, {
+    method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+  });
+  const d = await r.json();
+  if (!r.ok || d.error) { toast(d.error || 'Erro ao editar aposta.', 'err'); return; }
+  closeModal('modal-banca-edit');
+  loadMinhaBanca();
+  toast('Aposta da banca atualizada!');
+}
+
+async function fetchPendingUsers() {
+  try {
+    const d = await fetch('/api/admin/users').then(r => r.json());
+    approvedUsersById = Object.fromEntries((d.approved || []).map(u => [u.id, u]));
+    $('pending-users').innerHTML = d.pending.length
+      ? d.pending.map(u => `<div class="card2" style="padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+          <div>
+            <div style="font-weight:700;">${u.nome}</div>
+            <div style="font-size:12px;color:var(--muted);">${u.email}</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input class="inp" type="number" min="0" step="1" id="pending-days-${u.id}" placeholder="Dias ativos" style="width:120px;">
+            <button class="btn btn-g" onclick="approveUser('${u.id}')">Aprovar</button>
+          </div>
+        </div>`).join('')
+      : '<div class="empty" style="padding:20px 0;">Nenhuma solicitação pendente.</div>';
+    $('approved-users').innerHTML = d.approved.length
+      ? `<div class="mini-card-grid">${d.approved.map(u => `
+          <div class="card2 mini-card">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;">
+              <div>
+                <div style="font-weight:700;">${u.nome}</div>
+                <div style="font-size:12px;color:var(--muted);word-break:break-word;">${u.email}</div>
+              </div>
+              <span class="${userStatusClass(u.status)}">${userStatusLabel(u.status)}</span>
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Cadastro: ${u.created_at ? new Date(u.created_at).toLocaleDateString('pt-BR') : '—'}</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Validade: ${fmtActiveUntil(u.active_until)}</div>
+            <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="openUserEdit('${u.id}')">Editar</button>
+          </div>
+        `).join('')}</div>`
+      : '<div class="empty" style="padding:20px 0;">Nenhum cliente aprovado ainda.</div>';
+  } catch(e) { console.error('fetchPendingUsers', e); }
+}
+
+async function approveUser(id) {
+  const activeDays = $(`pending-days-${id}`)?.value || '';
+  await fetch(`/api/admin/users/${id}/approve`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({active_days: activeDays})
+  });
+  fetchPendingUsers();
+  toast('Usuário aprovado com sucesso!');
+}
+
+function openUserEdit(id) {
+  const user = approvedUsersById[id];
+  if (!user) return;
+  $('u-id').value = user.id;
+  $('u-nome').value = user.nome || '';
+  $('u-email').value = user.email || '';
+  $('u-status').value = user.status || 'active';
+  $('u-days').value = '';
+  $('u-meta').textContent = `Status atual: ${userStatusLabel(user.status)} • validade: ${fmtActiveUntil(user.active_until)}`;
+  openModal('modal-user-edit');
+}
+
+async function saveUserEdit() {
+  const id = $('u-id').value;
+  const selectedStatus = $('u-status').value;
+  const action = selectedStatus === 'paused' ? 'pause' : selectedStatus === 'standby' ? 'standby' : 'activate';
+  const r = await fetch(`/api/admin/users/${id}`, {
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      nome: $('u-nome').value,
+      email: $('u-email').value,
+      active_days: $('u-days').value,
+      action
+    })
+  });
+  const d = await r.json();
+  if (!r.ok || d.error) { toast(d.error || 'Erro ao atualizar cliente.', 'err'); return; }
+  closeModal('modal-user-edit');
+  fetchPendingUsers();
+  toast('Cliente atualizado com sucesso!');
+}
+
+async function quickUserAction(action) {
+  const id = $('u-id').value;
+  const r = await fetch(`/api/admin/users/${id}`, {
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      nome: $('u-nome').value,
+      email: $('u-email').value,
+      active_days: $('u-days').value,
+      action
+    })
+  });
+  const d = await r.json();
+  if (!r.ok || d.error) { toast(d.error || 'Erro ao atualizar status.', 'err'); return; }
+  closeModal('modal-user-edit');
+  fetchPendingUsers();
+  toast('Status do cliente atualizado!');
+}
+
+async function deleteUser() {
+  const id = $('u-id').value;
+  if (!confirm('Remover este cliente e as apostas cadastradas na banca dele?')) return;
+  await fetch(`/api/admin/users/${id}`, {method:'DELETE'});
+  closeModal('modal-user-edit');
+  fetchPendingUsers();
+  toast('Cliente removido.', 'warn');
+}
+
+async function fetchAdmin() {
+  try {
+    const d = await fetch(`/api/admin/apostas?page=${adminPage}`).then(r => r.json());
+    adminRowsById = Object.fromEntries((d.data || []).map(r => [r.id, r]));
+    const pages = Math.max(1, Math.ceil(d.total / 50));
+    $('admin-title').textContent = `Gerenciar Apostas (${d.total} registros)`;
+    $('tb-admin').innerHTML = d.data.length
+      ? d.data.map(r => `<tr>
+          <td style="font-family:monospace;font-size:11px;color:var(--muted);">${r.id}</td>
+          <td>${r.liga}</td>
+          <td>${r.data}</td>
+          <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;">${r.confronto}</td>
+          <td><span class="badge badge-${(r.mercado||'').toLowerCase()}">${r.mercado}</span></td>
+          <td class="r">${r.odd}</td>
+          <td>${r.resultado}</td>
+          <td style="white-space:nowrap;">
+            <button onclick="openEdit('${r.id}')" style="background:none;border:none;cursor:pointer;font-size:16px;padding:2px 6px;" title="Editar">✏️</button>
+            <button onclick="delRow('${r.id}')" style="background:none;border:none;cursor:pointer;font-size:16px;padding:2px 6px;color:var(--red);" title="Deletar">🗑</button>
+          </td>
+        </tr>`).join('')
+      : '<tr><td colspan="8" class="empty">Nenhum registro encontrado</td></tr>';
+    $('admin-info').textContent = `Página ${adminPage} de ${pages} (${d.total} registros)`;
+    $('aprev').disabled = adminPage <= 1;
+    $('anext').disabled = adminPage >= pages;
+  } catch(e) { console.error('fetchAdmin', e); }
+}
+
+function openEdit(id) {
+  const r = adminRowsById[id];
+  if (!r) return;
+  $('e-id').value         = r.id;
+  $('e-liga').value       = r.liga;
+  $('e-data').value       = r.data;
+  $('e-hora').value       = r.hora;
+  $('e-confronto').value  = r.confronto;
+  $('e-mercado').value    = r.mercado;
+  $('e-odd').value        = r.odd;
+  $('e-resultado').value  = r.resultado;
+  openModal('modal-edit');
+}
+
+async function saveEdit() {
+  const id = $('e-id').value;
+  const body = {
+    liga: $('e-liga').value, data: $('e-data').value,
+    hora: $('e-hora').value, confronto: $('e-confronto').value,
+    mercado: $('e-mercado').value, odd: $('e-odd').value,
+    resultado: $('e-resultado').value,
+  };
+  const r = await fetch(`/api/admin/aposta/${id}`, {
+    method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+  });
+  if (r.ok) { closeModal('modal-edit'); fetchAdmin(); toast('Aposta atualizada!'); }
+  else       toast('Erro ao salvar.', 'err');
+}
+
+async function delRow(id) {
+  if (!confirm('Deletar esta aposta?')) return;
+  await fetch(`/api/admin/aposta/${id}`, {method:'DELETE'});
+  fetchAdmin();
+  toast('Aposta deletada.', 'warn');
+}
+
+async function uploadFile(inp) {
+  const file = inp.files[0]; if (!file) return;
+  const fd = new FormData(); fd.append('file', file);
+  $('up-status').innerHTML = '<span style="color:var(--muted)">⏳ Importando…</span>';
+  const r = await fetch('/api/upload', {method:'POST', body: fd});
+  const d = await r.json();
+  inp.value = '';
+  if (d.success) {
+    $('up-status').innerHTML = `<span style="color:var(--green)">✅ ${d.inserted} registros importados!</span>`;
+    fetchAdmin();
+    toast(`${d.inserted} registros importados com sucesso!`);
+  } else {
+    $('up-status').innerHTML = `<span style="color:var(--red)">❌ ${d.error}</span>`;
+    toast(d.error, 'err');
+  }
+}
+
+async function quickUpload(inp) {
+  const file = inp.files[0]; if (!file) return;
+  const fd = new FormData(); fd.append('file', file);
+  const r = await fetch('/api/upload', {method:'POST', body: fd});
+  const d = await r.json();
+  inp.value = '';
+  if (d.success) { dadosPage = 1; fetchDados(); toast(`${d.inserted} registros importados!`); }
+  else toast(d.error, 'err');
+}
+
+async function clearAll() {
+  if (!confirm('⚠️ Isso vai apagar TODOS os dados permanentemente.\nConfirma?')) return;
+  await fetch('/api/admin/clear', {method:'POST'});
+  fetchAdmin();
+  toast('Todos os dados foram apagados.', 'warn');
+}
+
+async function clearPeriod() {
+  const di = $('del-start').value;
+  const df = $('del-end').value;
+  if (!di || !df) { toast('Selecione as datas inicial e final.', 'warn'); return; }
+  const fmt = s => s.split('-').reverse().join('/'); // yyyy-mm-dd → dd/mm/yyyy
+  const r = await fetch('/api/admin/clear_period', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({data_inicial: fmt(di), data_final: fmt(df)})
+  });
+  const d = await r.json();
+  if (d.error) { toast(d.error, 'err'); return; }
+  fetchAdmin();
+  toast(`${d.deleted} registro(s) deletado(s).`, 'warn');
+}
+
+// ════════════════════════════════════════════════════════════
+// Banca Analytics Cards
+// ════════════════════════════════════════════════════════════
+function renderBancaAnalytics(apostas) {
+  // Helper: group and sum lucro
+  function groupBy(arr, key) {
+    const map = {};
+    for (const r of arr) {
+      const k = r[key] || '—';
+      if (!map[k]) map[k] = { entradas: 0, lucro: 0, greens: 0 };
+      map[k].entradas++;
+      map[k].lucro += Number(r.lucro || 0);
+      if (r.resultado === 'Green' || r.resultado === 'Meio Green') map[k].greens++;
+    }
+    return Object.entries(map).sort((a, b) => b[1].lucro - a[1].lucro);
+  }
+
+  function faixaHoraria(hora) {
+    if (!hora) return '—';
+    const h = parseInt((hora || '00').split(':')[0]);
+    const s = Math.floor(h / 4) * 4;
+    const e = s + 4;
+    return `${String(s).padStart(2,'0')}h–${String(e).padStart(2,'0')}h`;
+  }
+
+  function renderTable(data, label) {
+    if (!data.length) return '<div style="color:var(--muted);font-size:12px;">Sem dados</div>';
+    return data.slice(0, 6).map(([k, v]) => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--text);">${k}</div>
+          <div style="font-size:11px;color:var(--muted);">${v.entradas} apostas · WR ${v.entradas ? Math.round(v.greens/v.entradas*100) : 0}%</div>
+        </div>
+        <span style="font-weight:700;font-size:13px;color:${v.lucro >= 0 ? 'var(--green)' : 'var(--red)'};">${v.lucro >= 0 ? '+' : ''}R$ ${v.lucro.toFixed(2)}</span>
+      </div>`).join('');
+  }
+
+  const byLiga = groupBy(apostas, 'liga');
+  const byMercado = groupBy(apostas, 'mercado');
+
+  // faixa horária de 4 em 4 horas
+  const comFaixa = apostas.map(r => ({ ...r, _faixa: faixaHoraria(r.hora) }));
+  const byFaixa = groupBy(comFaixa, '_faixa');
+
+  $('banca-liga-chart').innerHTML = renderTable(byLiga, 'liga');
+  $('banca-mercado-chart').innerHTML = renderTable(byMercado, 'mercado');
+  $('banca-faixa-chart').innerHTML = renderTable(byFaixa, 'faixa');
+}
+
+// ════════════════════════════════════════════════════════════
+// Autocomplete — popula datalists com dados já cadastrados
+// ════════════════════════════════════════════════════════════
+async function loadAutocomplete() {
+  try {
+    const confrontosSet = new Set();
+    const ligasSet = new Set();
+
+    // Busca dados brutos (até 3 páginas = ~150 registros para sugestões)
+    for (let p = 1; p <= 3; p++) {
+      const d = await fetch(`/api/dados_brutos?search=&mercado=&page=${p}`).then(r => r.json()).catch(() => null);
+      if (!d || !d.data || !d.data.length) break;
+      for (const r of d.data) {
+        if (r.confronto) confrontosSet.add(r.confronto);
+        if (r.liga) ligasSet.add(r.liga);
+      }
+      const totalPages = Math.ceil((d.total || 0) / (d.per_page || 50));
+      if (p >= totalPages) break;
+    }
+
+    // Também da banca pessoal
+    const bancaData = await fetch('/api/minha_banca').then(r => r.json()).catch(() => ({ apostas: [] }));
+    for (const r of (bancaData.apostas || [])) {
+      if (r.confronto) confrontosSet.add(r.confronto);
+      if (r.liga) ligasSet.add(r.liga);
+    }
+
+    const dlConf = $('dl-confrontos');
+    const dlLiga = $('dl-ligas');
+    if (dlConf) dlConf.innerHTML = [...confrontosSet].sort().map(c => `<option value="${c}">`).join('');
+    if (dlLiga) dlLiga.innerHTML = [...ligasSet].sort().map(l => `<option value="${l}">`).join('');
+  } catch(e) { /* silencioso */ }
+}
+
+// ════════════════════════════════════════════════════════════
+// Init
+// ════════════════════════════════════════════════════════════
+(async () => {
+  applyBranding();
+  bindUploadTriggers();
+  switchAuthTab('login');
+  const auth = await fetch('/api/check_auth').then(r => r.json());
+  setLoggedIn(auth.logged_in, auth.user || null);
+  loadDashboard();
+})();
+</script>
+</body>
+</html>

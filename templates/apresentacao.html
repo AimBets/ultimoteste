@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Bazuka VIP — Resultados que falam por si</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:     #050e08;
+  --surf:   #091410;
+  --card:   #0d1e16;
+  --border: rgba(0,230,118,.13);
+  --green:  #00e676;
+  --green2: #00c853;
+  --red:    #ff5252;
+  --yellow: #ffd740;
+  --muted:  #6b9478;
+  --text:   #e4f5ea;
+  --white:  #ffffff;
+}
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.3;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");
+}
+.shell { max-width:1060px; margin:0 auto; padding:0 20px 72px; position:relative; z-index:1; }
+
+/* ── TOPBAR ── */
+.topbar {
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:13px 20px; margin:14px 0 0;
+  border:1px solid var(--border); border-radius:18px;
+  background:rgba(13,30,22,.85); backdrop-filter:blur(14px);
+  position:sticky; top:10px; z-index:100;
+  flex-wrap:wrap;
+}
+.brand { display:flex; align-items:center; gap:13px; text-decoration:none; }
+.logo {
+  width:44px; height:44px; border-radius:13px; flex-shrink:0;
+  background:#0c1511 url('/static/img/logo.png') center/cover no-repeat;
+  box-shadow:0 0 22px rgba(0,230,118,.2);
+}
+.brand-name { font-family:'Bebas Neue',sans-serif; font-size:21px; letter-spacing:.06em; color:var(--green); line-height:1; }
+.brand-sub  { font-size:11px; color:var(--muted); }
+.topbar-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.cta-nav {
+  display:inline-flex; align-items:center; gap:7px;
+  background:var(--green); color:#021008; font-weight:800; font-size:14px;
+  padding:10px 22px; border-radius:12px; text-decoration:none; white-space:nowrap;
+  transition:background .15s, transform .1s;
+}
+.cta-nav:hover { background:#33ff9a; transform:translateY(-1px); }
+.nav-link {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(0,230,118,.07); border:1px solid var(--border);
+  color:var(--text); font-weight:600; font-size:13px;
+  padding:9px 16px; border-radius:12px; text-decoration:none; white-space:nowrap;
+  transition:background .15s, border-color .15s, transform .1s;
+}
+.nav-link:hover { background:rgba(0,230,118,.14); border-color:rgba(0,230,118,.35); transform:translateY(-1px); }
+
+/* ── HERO ── */
+.hero { padding:68px 0 52px; text-align:center; position:relative; }
+.hero::before {
+  content:''; position:absolute; top:-80px; left:50%; transform:translateX(-50%);
+  width:760px; height:460px;
+  background:radial-gradient(ellipse,rgba(0,230,118,.1) 0%,transparent 68%);
+  pointer-events:none;
+}
+.eyebrow {
+  display:inline-flex; align-items:center; gap:7px;
+  border:1px solid rgba(0,230,118,.3); background:rgba(0,230,118,.06);
+  padding:5px 14px; border-radius:999px;
+  font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--green);
+  margin-bottom:22px;
+}
+.pulse { width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+.hero h1 {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(50px,9vw,92px);
+  line-height:.92; letter-spacing:.02em; color:var(--white); margin-bottom:18px;
+}
+.hero h1 em { font-style:normal; color:var(--green); }
+.hero-sub { font-size:17px; color:var(--muted); max-width:540px; margin:0 auto 34px; line-height:1.7; }
+.hero-cta {
+  display:inline-flex; align-items:center; gap:10px;
+  background:var(--green); color:#021008; padding:17px 36px; border-radius:14px;
+  font-weight:800; font-size:17px; text-decoration:none;
+  box-shadow:0 0 50px rgba(0,230,118,.25); transition:all .2s;
+}
+.hero-cta:hover { background:#33ff9a; transform:translateY(-2px); box-shadow:0 0 70px rgba(0,230,118,.4); }
+.hero-note { font-size:12px; color:var(--muted); margin-top:12px; display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap; }
+
+/* ── NÚMEROS DESTAQUE (dinâmicos) ── */
+.numbers-strip {
+  display:grid; grid-template-columns:repeat(4,1fr);
+  background:var(--surf); border:1px solid var(--border); border-radius:20px;
+  overflow:hidden; margin-bottom:64px;
+}
+.num-item { padding:26px 18px; text-align:center; border-right:1px solid var(--border); }
+.num-item:last-child { border-right:none; }
+.num-big { font-family:'Bebas Neue',sans-serif; font-size:52px; line-height:1; color:var(--green); }
+.num-big.loading { opacity:.35; }
+.num-lbl { font-size:12px; color:var(--muted); font-weight:500; margin-top:4px; }
+
+/* ── SECTION LABELS ── */
+.sec-label { font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--green); margin-bottom:10px; }
+.sec-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(30px,5vw,50px); color:var(--white); line-height:1; margin-bottom:12px; }
+.sec-sub { font-size:15px; color:var(--muted); max-width:520px; line-height:1.7; }
+
+/* ── SKELETON LOADER ── */
+.skel {
+  background:linear-gradient(90deg,var(--card) 25%,#162b1f 50%,var(--card) 75%);
+  background-size:200% 100%; animation:skel 1.4s infinite;
+  border-radius:6px; display:inline-block;
+}
+@keyframes skel { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* ── CONSTÂNCIA ── */
+.constancia { padding:16px 0 60px; }
+.constancia-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:44px; align-items:start; }
+
+/* Tabela de meses */
+.months-list { display:flex; flex-direction:column; gap:8px; }
+.month-row {
+  display:flex; align-items:center; gap:10px;
+  background:var(--card); border:1px solid var(--border); border-radius:12px; padding:13px 16px;
+  transition:border-color .2s;
+}
+.month-row:hover { border-color:rgba(0,230,118,.3); }
+.month-name { font-size:13px; font-weight:700; color:var(--white); width:72px; flex-shrink:0; }
+.month-bar-wrap { flex:1; height:7px; background:rgba(255,255,255,.06); border-radius:999px; overflow:hidden; }
+.month-bar { height:100%; border-radius:999px; transition:width .6s ease; }
+.month-bar.pos { background:linear-gradient(90deg,var(--green2),var(--green)); }
+.month-bar.neg { background:linear-gradient(90deg,#c62828,var(--red)); }
+.month-result { font-size:14px; font-weight:800; min-width:64px; text-align:right; }
+.month-result.pos { color:var(--green); }
+.month-result.neg { color:var(--red); }
+.month-roi { font-size:11px; color:var(--muted); min-width:48px; text-align:right; }
+
+/* Total acumulado */
+.months-total {
+  padding:13px 16px;
+  background:rgba(0,230,118,.05); border:1px solid rgba(0,230,118,.22); border-radius:12px;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.months-total span:first-child { font-size:14px; font-weight:700; color:var(--white); }
+.months-total .total-val { font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--green); }
+.months-total .total-val.neg { color:var(--red); }
+.months-note { font-size:11px; color:var(--muted); padding:0 4px; line-height:1.5; }
+
+/* Últimos 3 meses resumo */
+.last3-card {
+  background:var(--card); border:1px solid rgba(0,230,118,.22); border-radius:16px; padding:22px;
+  margin-bottom:14px; position:relative; overflow:hidden;
+}
+.last3-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,230,118,.5),transparent);
+}
+.last3-title { font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--green); margin-bottom:14px; }
+.last3-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.last3-item { text-align:center; }
+.last3-mes { font-size:11px; color:var(--muted); margin-bottom:4px; }
+.last3-val { font-family:'Bebas Neue',sans-serif; font-size:30px; line-height:1; }
+.last3-val.pos { color:var(--green); }
+.last3-val.neg { color:var(--red); }
+.last3-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+
+/* Insights */
+.insight-card {
+  background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px;
+  position:relative; overflow:hidden; margin-bottom:14px;
+}
+.insight-card:last-child { margin-bottom:0; }
+.insight-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,230,118,.35),transparent);
+}
+.insight-icon { font-size:24px; margin-bottom:8px; }
+.insight-title { font-size:15px; font-weight:700; color:var(--white); margin-bottom:5px; }
+.insight-desc { font-size:13px; color:var(--muted); line-height:1.6; }
+.insight-stat { font-family:'Bebas Neue',sans-serif; font-size:32px; line-height:1; margin-top:8px; }
+.insight-stat.pos { color:var(--green); }
+.insight-stat.neg { color:var(--red); }
+
+/* ── O QUE VOCÊ RECEBE ── */
+.entrega { padding:16px 0 60px; }
+.entrega-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:44px; }
+.entrega-card {
+  background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px;
+  transition:border-color .2s, transform .2s;
+}
+.entrega-card:hover { border-color:rgba(0,230,118,.28); transform:translateY(-3px); }
+.entrega-icon {
+  width:44px; height:44px; border-radius:11px;
+  background:rgba(0,230,118,.08); border:1px solid rgba(0,230,118,.15);
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; margin-bottom:14px;
+}
+.entrega-title { font-size:15px; font-weight:700; color:var(--white); margin-bottom:7px; }
+.entrega-desc  { font-size:13px; color:var(--muted); line-height:1.65; }
+
+/* ── COMPARAÇÃO ── */
+.compare { padding:16px 0 60px; }
+.compare-table { margin-top:44px; border:1px solid var(--border); border-radius:18px; overflow:hidden; }
+.compare-head { display:grid; grid-template-columns:1.2fr 1fr 1fr; background:var(--surf); }
+.compare-head-cell { padding:14px 18px; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+.compare-head-cell.bazuka { color:var(--green); }
+.compare-head-cell.outros { color:var(--muted); }
+.compare-row { display:grid; grid-template-columns:1.2fr 1fr 1fr; border-top:1px solid var(--border); }
+.compare-row:hover { background:rgba(0,230,118,.03); }
+.compare-cell { padding:13px 18px; font-size:13px; display:flex; align-items:center; gap:7px; }
+.compare-cell.aspecto { color:var(--muted); font-weight:600; }
+.compare-cell.yes  { color:var(--green); font-weight:600; }
+.compare-cell.no   { color:var(--muted); }
+
+/* ── CTA FINAL ── */
+.cta-section { padding:16px 0 20px; text-align:center; position:relative; }
+.cta-section::before {
+  content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:600px; height:280px;
+  background:radial-gradient(ellipse,rgba(0,230,118,.08),transparent 65%);
+  pointer-events:none;
+}
+.cta-section h2 {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(34px,6vw,62px); color:var(--white); line-height:1; margin-bottom:16px;
+}
+.cta-section h2 em { font-style:normal; color:var(--green); }
+.cta-section p { font-size:16px; color:var(--muted); max-width:440px; margin:0 auto 28px; line-height:1.7; }
+.cta-big {
+  display:inline-flex; align-items:center; gap:10px;
+  background:var(--green); color:#021008;
+  padding:17px 40px; border-radius:14px;
+  font-weight:800; font-size:17px; text-decoration:none;
+  box-shadow:0 0 56px rgba(0,230,118,.2); transition:all .2s;
+}
+.cta-big:hover { background:#33ff9a; transform:translateY(-2px); box-shadow:0 0 76px rgba(0,230,118,.35); }
+.cta-guarantees { display:flex; align-items:center; justify-content:center; gap:24px; flex-wrap:wrap; margin-top:18px; }
+.cta-g-item { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); font-weight:600; }
+
+/* ── FOOTER ── */
+footer { border-top:1px solid var(--border); padding:22px 20px; text-align:center; font-size:12px; color:var(--muted); position:relative; z-index:1; }
+
+/* ── RESPONSIVE ── */
+@media (max-width:860px) {
+  .topbar { flex-direction:column; align-items:flex-start; padding:13px 14px; }
+  .topbar-right { width:100%; }
+  .cta-nav { width:100%; justify-content:center; }
+  .nav-link { font-size:12px; padding:8px 12px; }
+  .numbers-strip { grid-template-columns:1fr 1fr; }
+  .num-item:nth-child(2) { border-right:none; }
+  .num-item { border-bottom:1px solid var(--border); }
+  .num-item:nth-child(3), .num-item:nth-child(4) { border-bottom:none; }
+  .constancia-grid { grid-template-columns:1fr; }
+  .entrega-grid { grid-template-columns:1fr 1fr; }
+  .compare-head-cell, .compare-cell { padding:11px 12px; font-size:11px; }
+}
+@media (max-width:520px) {
+  .entrega-grid { grid-template-columns:1fr; }
+  .last3-grid { grid-template-columns:1fr; gap:8px; }
+  .last3-item { display:flex; align-items:center; justify-content:space-between; }
+  .last3-val { font-size:24px; }
+  .hero-sub { font-size:15px; }
+  .cta-guarantees { flex-direction:column; gap:10px; }
+  .compare-table { font-size:11px; }
+  .hero h1 { font-size:clamp(42px,13vw,64px); }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="/" class="brand">
+    <div class="logo"></div>
+    <div>
+      <div class="brand-name">Bazuka VIP</div>
+      <div class="brand-sub">Sinais com constância. Resultados com prova.</div>
+    </div>
+  </a>
+  <div class="topbar-right">
+    <a href="https://t.me/suportebazuka" target="_blank" class="nav-link">💬 Suporte</a>
+    <a href="https://www.instagram.com/bazukabets/" target="_blank" class="nav-link">📸 Instagram</a>
+    <a href="https://bazukabets.up.railway.app/" target="_blank" class="nav-link">📊 Planilha</a>
+    <a href="https://t.me/bazukabetsbot" target="_blank" class="cta-nav">Quero entrar no VIP →</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="eyebrow"><span class="pulse"></span> Grupo VIP — vagas limitadas</div>
+  <h1>Constância<br>não é <em>sorte.</em><br>É método.</h1>
+  <p class="hero-sub">
+    Os números abaixo não são estimativas — são puxados diretamente do painel, em tempo real, da mesma base de dados que os membros acompanham todo dia.
+  </p>
+  <a href="https://t.me/bazukabetsbot" target="_blank" class="hero-cta">Quero entrar no VIP →</a>
+  <div class="hero-note">🔒 Pagamento seguro &nbsp;·&nbsp; ↩️ 7 dias de garantia &nbsp;·&nbsp; ⚡ Acesso imediato</div>
+</section>
+
+<!-- NÚMEROS DESTAQUE (dinâmicos) -->
+<div class="numbers-strip">
+  <div class="num-item">
+    <div class="num-big loading" id="dn-lucro">—</div>
+    <div class="num-lbl">Resultado em unidades</div>
+  </div>
+  <div class="num-item">
+    <div class="num-big loading" id="dn-winrate">—</div>
+    <div class="num-lbl">Taxa de acerto (win rate)</div>
+  </div>
+  <div class="num-item">
+    <div class="num-big loading" id="dn-roi">—</div>
+    <div class="num-lbl">ROI acumulado</div>
+  </div>
+  <div class="num-item">
+    <div class="num-big loading" id="dn-entradas">—</div>
+    <div class="num-lbl">Entradas registradas</div>
+  </div>
+</div>
+
+<!-- CONSTÂNCIA -->
+<section class="constancia">
+  <div class="sec-label">Histórico real · direto do painel</div>
+  <div class="sec-title">Mês a mês,<br>tudo registrado.</div>
+  <p class="sec-sub">
+    Cada resultado abaixo é puxado da planilha que os membros usam. Greens, reds, ROI — nada editado, nada escondido.
+  </p>
+
+  <div class="constancia-grid">
+
+    <!-- Coluna esquerda: lista de meses -->
+    <div>
+      <div class="months-list" id="months-list">
+        <!-- Skeleton enquanto carrega -->
+        <div class="month-row">
+          <span class="month-name skel" style="width:64px;height:16px">&nbsp;</span>
+          <div class="month-bar-wrap"><div class="month-bar pos skel" style="width:60%"></div></div>
+          <span class="month-result skel" style="width:52px;height:16px">&nbsp;</span>
+          <span class="month-roi skel" style="width:36px;height:14px">&nbsp;</span>
+        </div>
+        <div class="month-row">
+          <span class="month-name skel" style="width:64px;height:16px">&nbsp;</span>
+          <div class="month-bar-wrap"><div class="month-bar pos skel" style="width:40%"></div></div>
+          <span class="month-result skel" style="width:52px;height:16px">&nbsp;</span>
+          <span class="month-roi skel" style="width:36px;height:14px">&nbsp;</span>
+        </div>
+        <div class="month-row">
+          <span class="month-name skel" style="width:64px;height:16px">&nbsp;</span>
+          <div class="month-bar-wrap"><div class="month-bar pos skel" style="width:75%"></div></div>
+          <span class="month-result skel" style="width:52px;height:16px">&nbsp;</span>
+          <span class="month-roi skel" style="width:36px;height:14px">&nbsp;</span>
+        </div>
+      </div>
+
+      <div class="months-total" id="months-total" style="margin-top:10px;display:none;">
+        <span>Lucro total acumulado</span>
+        <span class="total-val" id="total-val">—</span>
+      </div>
+      <div class="months-note" id="months-note" style="margin-top:8px;display:none;">
+        ✅ Dados extraídos diretamente da planilha do painel. Atualizados a cada importação.
+      </div>
+    </div>
+
+    <!-- Coluna direita: insights dinâmicos -->
+    <div>
+      <!-- Últimos 3 meses -->
+      <div class="last3-card">
+        <div class="last3-title">📅 Últimos 3 meses registrados</div>
+        <div class="last3-grid" id="last3-grid">
+          <div class="last3-item">
+            <div class="last3-mes skel" style="width:48px;height:12px;margin:0 auto 4px">&nbsp;</div>
+            <div class="last3-val pos skel" style="width:60px;height:30px;margin:0 auto">&nbsp;</div>
+          </div>
+          <div class="last3-item">
+            <div class="last3-mes skel" style="width:48px;height:12px;margin:0 auto 4px">&nbsp;</div>
+            <div class="last3-val pos skel" style="width:60px;height:30px;margin:0 auto">&nbsp;</div>
+          </div>
+          <div class="last3-item">
+            <div class="last3-mes skel" style="width:48px;height:12px;margin:0 auto 4px">&nbsp;</div>
+            <div class="last3-val pos skel" style="width:60px;height:30px;margin:0 auto">&nbsp;</div>
+          </div>
+        </div>
+        <div id="last3-summary" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);display:none;">
+          Soma dos 3 últimos meses: <strong id="last3-soma" style="color:var(--green)">—</strong> unidades &nbsp;|&nbsp; ROI médio: <strong id="last3-roi-medio" style="color:var(--green)">—</strong>
+        </div>
+      </div>
+
+      <!-- Insight 1: Meses positivos -->
+      <div class="insight-card">
+        <div class="insight-icon">📅</div>
+        <div class="insight-title" id="ins-meses-pos-title">Meses no positivo</div>
+        <div class="insight-desc">Do total de meses registrados, a grande maioria fechou com lucro. Isso não é sorte — é consistência de método ao longo do tempo.</div>
+        <div class="insight-stat pos" id="ins-meses-pos">—</div>
+      </div>
+
+      <!-- Insight 2: Win rate -->
+      <div class="insight-card">
+        <div class="insight-icon">🎯</div>
+        <div class="insight-title">Taxa de acerto geral</div>
+        <div class="insight-desc" id="ins-winrate-desc">Calculando com base nos dados reais do painel...</div>
+        <div class="insight-stat pos" id="ins-winrate">—</div>
+      </div>
+
+      <!-- Insight 3: Lucro total -->
+      <div class="insight-card">
+        <div class="insight-icon">💰</div>
+        <div class="insight-title">Lucro total registrado</div>
+        <div class="insight-desc">Todos os greens e reds somados, sem edição. O resultado é o que está no banco de dados.</div>
+        <div class="insight-stat" id="ins-lucro">—</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- O QUE VOCÊ RECEBE -->
+<section class="entrega">
+  <div class="sec-label">O que está incluso</div>
+  <div class="sec-title">Tudo que você precisa<br>para operar certo.</div>
+  <p class="sec-sub">O VIP não é só um grupo de Telegram. É um ecossistema de resultado e gestão.</p>
+  <div class="entrega-grid">
+    <div class="entrega-card">
+      <div class="entrega-icon">🕐</div>
+      <div class="entrega-title">Apostas 24 Horas</div>
+      <div class="entrega-desc">Sinais enviados todos os dias, em qualquer horário. Nunca perca uma oportunidade.</div>
+    </div>
+    <div class="entrega-card">
+      <div class="entrega-icon">📊</div>
+      <div class="entrega-title">Painel de resultados</div>
+      <div class="entrega-desc">Acesso ao painel com histórico completo: ROI por mês, win rate, faixas horárias, ligas e mais — tudo ao vivo.</div>
+    </div>
+    <div class="entrega-card">
+      <div class="entrega-icon">💰</div>
+      <div class="entrega-title">Alta Lucratividade</div>
+      <div class="entrega-desc">Resultados comprovados com foco em apostas de alto retorno. Dados reais, sem edição.</div>
+    </div>
+    <div class="entrega-card">
+      <div class="entrega-icon">🤖</div>
+      <div class="entrega-title">Robô Exclusivo</div>
+      <div class="entrega-desc">Tecnologia de ponta que analisa e envia os melhores sinais automaticamente, direto no seu Telegram.</div>
+    </div>
+    <div class="entrega-card">
+      <div class="entrega-icon">🎯</div>
+      <div class="entrega-title">FIFA Over/Under</div>
+      <div class="entrega-desc">Especialização total em FIFA com foco no mercado Over/Under — o mercado com maior edge do nosso histórico.</div>
+    </div>
+    <div class="entrega-card">
+      <div class="entrega-icon">🔒</div>
+      <div class="entrega-title">Grupo fechado (máx. 30)</div>
+      <div class="entrega-desc">Estritamente limitado a 30 membros. Menos ruído, mais qualidade. Cada vaga tem um dono.</div>
+    </div>
+    <div class="entrega-card">
+      <div class="entrega-icon">📅</div>
+      <div class="entrega-title">4 meses seguidos no lucro</div>
+      <div class="entrega-desc">Constância não é palavra de ordem — é o que os dados mostram. Mês após mês fechando positivo, com reds registrados e nada escondido.</div>
+    </div>
+    <div class="entrega-card">
+      <div class="entrega-icon">📱</div>
+      <div class="entrega-title">Fácil de Acompanhar</div>
+      <div class="entrega-desc">Receba tudo direto no seu Telegram. Simples, rápido e prático — sem precisar ficar monitorando nada.</div>
+    </div>
+    <div class="entrega-card">
+      <div class="entrega-icon">🎧</div>
+      <div class="entrega-title">Suporte Direto</div>
+      <div class="entrega-desc">Atendimento personalizado para tirar todas as suas dúvidas. Você nunca fica no escuro.</div>
+    </div>
+    <div class="entrega-card">
+      <div class="entrega-icon">💼</div>
+      <div class="entrega-title">Gestão de banca</div>
+      <div class="entrega-desc">Registre suas apostas com valor real e acompanhe seu lucro em R$, ROI pessoal e evolução ao longo do tempo.</div>
+    </div>
+    <div class="entrega-card">
+      <div class="entrega-icon">↩️</div>
+      <div class="entrega-title">Garantia de 7 dias</div>
+      <div class="entrega-desc">Não gostou na primeira semana? Clique em reembolso na sua área de cliente. Automático, sem burocracia.</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- CTA FINAL -->
+<section class="cta-section">
+  <h2>Os números são<br><em>reais.</em> A vaga é sua.</h2>
+  <p>Vagas limitadas a 30 membros. Os dados acima foram puxados agora, direto do painel.</p>
+  <a href="https://t.me/bazukabetsbot" target="_blank" class="cta-big">Garantir minha vaga agora →</a>
+  <div class="cta-guarantees">
+    <div class="cta-g-item">🔒 Pagamento 100% seguro</div>
+    <div class="cta-g-item">⚡ Acesso em minutos</div>
+    <div class="cta-g-item">↩️ 7 dias de garantia</div>
+  </div>
+</section>
+
+</div><!-- /shell -->
+
+<footer>
+  <p>© 2025 Bazuka Bets VIP. Todos os direitos reservados.</p>
+  <p style="margin-top:5px;">Apostar envolve risco. Pratique com responsabilidade e dentro dos seus limites financeiros.</p>
+</footer>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// Helpers
+// ════════════════════════════════════════════════════════════
+function fmt(v, prefix=true) {
+  const s = (v >= 0 ? (prefix ? '+' : '') : '') + Number(v).toFixed(1);
+  return s;
+}
+function fmtRoi(v) {
+  return (v >= 0 ? '+' : '') + Number(v).toFixed(1) + '%';
+}
+
+// Normaliza "mm/yyyy" para exibição curta "Mmm/AA"
+const MESES_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+function mesLabel(key) {
+  // key = "01/2025" ou "1/2025"
+  try {
+    const [m, y] = key.split('/');
+    return MESES_PT[parseInt(m,10)-1] + '/' + String(y).slice(-2);
+  } catch(e) { return key; }
+}
+
+// Calcula a largura da barra (% relativa ao maior valor absoluto)
+function barWidth(val, maxAbs) {
+  if (!maxAbs) return '4%';
+  const pct = Math.abs(val) / maxAbs * 88;
+  return Math.max(pct, 4) + '%';
+}
+
+// ════════════════════════════════════════════════════════════
+// Carregar dados da API
+// ════════════════════════════════════════════════════════════
+async function loadData() {
+  try {
+    const d = await fetch('/api/dashboard').then(r => r.json());
+    renderAll(d);
+  } catch(e) {
+    console.error('Erro ao carregar dados:', e);
+    showFallback();
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// Renderiza tudo com os dados reais
+// ════════════════════════════════════════════════════════════
+function renderAll(d) {
+  const stats   = d.stats   || {};
+  const monthly = d.monthly || [];
+
+  // ── 1. Números destaque ────────────────────────────────────
+  const dn_lucro = document.getElementById('dn-lucro');
+  const dn_wr  = document.getElementById('dn-winrate');
+  const dn_roi = document.getElementById('dn-roi');
+  const dn_ent = document.getElementById('dn-entradas');
+
+  dn_lucro.classList.remove('loading');
+  dn_wr.classList.remove('loading');
+  dn_roi.classList.remove('loading');
+  dn_ent.classList.remove('loading');
+
+  dn_lucro.textContent = (stats.lucro != null ? (stats.lucro >= 0 ? '+' : '') + Number(stats.lucro).toFixed(1) + ' Un' : '—');
+  dn_wr.textContent  = (stats.win_rate != null ? stats.win_rate + '%' : '—');
+  dn_roi.textContent = (stats.roi      != null ? (stats.roi >= 0 ? '+' : '') + stats.roi + '%' : '—');
+  dn_ent.textContent = (stats.entradas != null ? stats.entradas : '—');
+
+  if (stats.lucro != null) dn_lucro.style.color = stats.lucro >= 0 ? 'var(--green)' : 'var(--red)';
+  if (stats.roi != null) dn_roi.style.color = stats.roi >= 0 ? 'var(--green)' : 'var(--red)';
+
+  // ── 2. Lista de meses ──────────────────────────────────────
+  const list = document.getElementById('months-list');
+
+  if (!monthly.length) {
+    list.innerHTML = '<div style="padding:20px;color:var(--muted);font-size:13px;text-align:center;">Nenhum dado registrado ainda.</div>';
+  } else {
+    const maxAbs = Math.max(...monthly.map(m => Math.abs(m.resultado)));
+    list.innerHTML = monthly.map(m => {
+      const pos   = m.resultado >= 0;
+      const label = mesLabel(m.mes);
+      const bw    = barWidth(m.resultado, maxAbs);
+      const resStr = fmt(m.resultado) + ' Un';
+      const roiStr = fmtRoi(m.roi);
+      return `
+        <div class="month-row">
+          <span class="month-name">${label}</span>
+          <div class="month-bar-wrap">
+            <div class="month-bar ${pos ? 'pos' : 'neg'}" style="width:${bw}"></div>
+          </div>
+          <span class="month-result ${pos ? 'pos' : 'neg'}">${resStr}</span>
+          <span class="month-roi">${roiStr}</span>
+        </div>`;
+    }).join('');
+
+    // Total acumulado
+    const totalLucro = monthly.reduce((s, m) => s + m.resultado, 0);
+    const totEl = document.getElementById('months-total');
+    const totVal = document.getElementById('total-val');
+    totEl.style.display = '';
+    totVal.textContent = fmt(totalLucro) + ' Un';
+    totVal.className = 'total-val ' + (totalLucro >= 0 ? '' : 'neg');
+
+    document.getElementById('months-note').style.display = '';
+  }
+
+  // ── 3. Últimos 3 meses ─────────────────────────────────────
+  const last3 = monthly.slice(-3);
+  const grid  = document.getElementById('last3-grid');
+
+  if (!last3.length) {
+    grid.innerHTML = '<div style="color:var(--muted);font-size:13px;">Sem dados suficientes.</div>';
+  } else {
+    grid.innerHTML = last3.map(m => {
+      const pos = m.resultado >= 0;
+      return `
+        <div class="last3-item">
+          <div class="last3-mes">${mesLabel(m.mes)}</div>
+          <div class="last3-val ${pos ? 'pos' : 'neg'}">${fmt(m.resultado)}</div>
+          <div class="last3-sub">${fmtRoi(m.roi)}</div>
+        </div>`;
+    }).join('');
+
+    // Resumo dos últimos 3
+    const soma3 = last3.reduce((s, m) => s + m.resultado, 0);
+    const roiMed3 = last3.reduce((s, m) => s + m.roi, 0) / last3.length;
+    const sumEl = document.getElementById('last3-summary');
+    sumEl.style.display = '';
+    const somaEl = document.getElementById('last3-soma');
+    const roiEl  = document.getElementById('last3-roi-medio');
+    somaEl.textContent = fmt(soma3) + ' Un';
+    somaEl.style.color = soma3 >= 0 ? 'var(--green)' : 'var(--red)';
+    roiEl.textContent  = fmtRoi(roiMed3);
+    roiEl.style.color  = roiMed3 >= 0 ? 'var(--green)' : 'var(--red)';
+  }
+
+  // ── 4. Insights dinâmicos ──────────────────────────────────
+
+  // Meses positivos
+  const mesesPos = monthly.filter(m => m.resultado > 0).length;
+  const mesesTot = monthly.length;
+  const insMesTitle = document.getElementById('ins-meses-pos-title');
+  const insMesVal   = document.getElementById('ins-meses-pos');
+  if (mesesTot > 0) {
+    const pct = Math.round(mesesPos / mesesTot * 100);
+    insMesTitle.textContent = `${mesesPos} de ${mesesTot} meses no positivo`;
+    insMesVal.textContent   = pct + '% dos meses lucrativos';
+    insMesVal.className     = 'insight-stat ' + (pct >= 50 ? 'pos' : 'neg');
+  }
+
+  // Win rate
+  const insWr = document.getElementById('ins-winrate');
+  const insWrDesc = document.getElementById('ins-winrate-desc');
+  if (stats.win_rate != null) {
+    const wr = parseFloat(stats.win_rate);
+    insWr.textContent = wr + '% de acerto';
+    insWr.className   = 'insight-stat ' + (wr >= 50 ? 'pos' : 'neg');
+    // Frase dinâmica baseada no valor real
+    const acertosPor10 = (wr / 10).toFixed(1);
+    insWrDesc.textContent = `A cada 10 entradas, aproximadamente ${acertosPor10} fecham no verde. Isso é o que transforma apostas em método.`;
+  }
+
+  // Lucro total
+  const insLucro = document.getElementById('ins-lucro');
+  if (stats.lucro != null) {
+    insLucro.textContent = fmt(stats.lucro) + ' Unidades';
+    insLucro.className   = 'insight-stat ' + (stats.lucro >= 0 ? 'pos' : 'neg');
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// Fallback se a API falhar (fora do painel / não logado)
+// ════════════════════════════════════════════════════════════
+function showFallback() {
+  // Não mostra dados falsos — mostra mensagem neutra
+  document.getElementById('months-list').innerHTML =
+    '<div style="padding:20px;color:var(--muted);font-size:13px;text-align:center;">Faça login no painel para ver os resultados em tempo real.</div>';
+  document.getElementById('last3-grid').innerHTML =
+    '<div style="color:var(--muted);font-size:13px;grid-column:1/-1;text-align:center;">Dados disponíveis para membros.</div>';
+  ['dn-lucro','dn-winrate','dn-roi','dn-entradas'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('loading');
+    el.textContent = '—';
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+// Init
+// ════════════════════════════════════════════════════════════
+loadData();
+</script>
+</body>
+</html>
