@@ -1394,6 +1394,9 @@ def _finalize_site_vip_payment(payment_id: str, info_mp: dict):
 def vip_checkout():
     return render_template('vip_checkout.html')
 
+@app.route('/migrar')
+def migrar_page():
+    return render_template('migrar.html')
 
 @app.route('/api/vip/create_payment', methods=['POST'])
 def create_vip_payment():
