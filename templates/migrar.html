@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>BazukaBets — Migrar payments.json</title>
+<style>
+  body { font-family: sans-serif; background: #0c1b16; color: #ddeedd; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+  .box { background: #112019; border: 1px solid #1d3828; border-radius: 12px; padding: 36px; max-width: 480px; width: 100%; }
+  h2 { color: #00e676; margin: 0 0 8px; }
+  p  { color: #6b9478; font-size: .9rem; margin: 0 0 24px; }
+  input[type=file] { width: 100%; background: #0c1b16; border: 1px dashed #1d3828; border-radius: 8px; padding: 20px; color: #ddeedd; margin-bottom: 16px; cursor: pointer; }
+  button { width: 100%; background: linear-gradient(135deg,#00c853,#009624); color: #000; font-weight: 700; font-size: 1rem; border: none; border-radius: 8px; padding: 13px; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .result { margin-top: 20px; padding: 14px; border-radius: 8px; font-size: .88rem; display: none; }
+  .ok  { background: #0d2219; border: 1px solid #00c853; color: #00e676; }
+  .err { background: #1a0a0a; border: 1px solid #ff4444; color: #ff6666; }
+  pre  { margin: 8px 0 0; white-space: pre-wrap; word-break: break-all; font-size: .8rem; }
+</style>
+</head>
+<body>
+<div class="box">
+  <h2>Migrar payments.json</h2>
+  <p>Selecione o arquivo <strong>payments.json</strong> para importar todos os cadastros para o PostgreSQL.</p>
+
+  <input type="file" id="file" accept=".json">
+  <button id="btn" onclick="migrar()">Importar para o banco</button>
+
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+async function migrar() {
+  const fileInput = document.getElementById('file');
+  const btn = document.getElementById('btn');
+  const resultDiv = document.getElementById('result');
+
+  if (!fileInput.files.length) {
+    alert('Selecione o arquivo payments.json primeiro.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Importando...';
+  resultDiv.style.display = 'none';
+
+  const form = new FormData();
+  form.append('file', fileInput.files[0]);
+
+  try {
+    const resp = await fetch('/api/admin/import_payments_json', {
+      method: 'POST',
+      body: form
+    });
+    const data = await resp.json();
+
+    resultDiv.style.display = 'block';
+    if (data.success) {
+      resultDiv.className = 'result ok';
+      resultDiv.innerHTML =
+        `✅ Migração concluída!<pre>` +
+        `Importados : ${data.imported}\n` +
+        `Atualizados: ${data.updated}\n` +
+        `Total      : ${data.total}</pre>`;
+    } else {
+      resultDiv.className = 'result err';
+      resultDiv.innerHTML = `❌ Erro: <pre>${JSON.stringify(data, null, 2)}</pre>`;
+    }
+  } catch(e) {
+    resultDiv.style.display = 'block';
+    resultDiv.className = 'result err';
+    resultDiv.innerHTML = `❌ Erro de conexão: ${e.message}`;
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Importar para o banco';
+}
+</script>
+</body>
+</html>
