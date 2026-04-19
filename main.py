@@ -48,7 +48,7 @@ from typing import Optional, Dict, Any
 BOT_TOKEN         = os.environ.get('BOT_TOKEN',        '8363865808:AAFM3x0a2aiO7ESwUaQK-H4w5fH0eYOE1UU')
 MP_ACCESS_TOKEN   = os.environ.get('MP_ACCESS_TOKEN',  'APP_USR-6797918640127185-112319-1c452a696a8c3b443de9b0fe2baa9c01-318433737')
 ADMIN_USER        = os.environ.get('ADMIN_USER',       'bazukabets@gmail.com')
-ADMIN_PASS        = os.environ.get('ADMIN_PASS',       '102030Mm..')
+ADMIN_PASS        = os.environ.get('ADMIN_PASS',       '2zdnalzlb5g0fmo080pfvszbg5eojcw6 102030Mm..')
 SITE_SECRET_KEY   = os.environ.get('SITE_SECRET_KEY',  'uB5G6Zfn8Ij7wJonqYslBRx3vpBq5ZJq')
 SITE_PUBLIC_URL   = os.environ.get('SITE_PUBLIC_URL',  '').strip().rstrip('/')  # Ex: https://seu-app.railway.app
 SMTP_HOST         = os.environ.get('SMTP_HOST',        '').strip()
